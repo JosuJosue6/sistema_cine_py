@@ -1,4 +1,6 @@
 from tkinter import Frame, Label, Listbox, StringVar, Scrollbar, messagebox, Button
+from models.promotion import Promotion  
+from controllers.promotion_controller import PromotionController  
 
 class PromotionsView(Frame):
     def __init__(self, master=None):

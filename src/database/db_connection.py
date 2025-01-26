@@ -20,11 +20,15 @@ class DatabaseConnection:
 
     #ejecutar una query
     def execute_query(self, query, params=None):
-        cursor = self.connection.cursor()
         try:
-            cursor.execute(query, params)
-            self.connection.commit()
-            return cursor.fetchall()
+            cursor = self.connection.cursor()
+            if params:
+                cursor.execute(query, params)
+            else:
+                cursor.execute(query)
+            result = cursor.fetchall()
+            cursor.close()
+            return result
         except Exception as e:
             print(f"Error executing query: {e}")
             return None
