@@ -17,14 +17,16 @@ class MovieController:
         return []
 
     # buscar películas por género, clasificación o idioma
-    def filter_movies(self, genre=None, classification=None, language=None):
+    def filter_movies(self, genre=None, classification=None, language=None, title=None):
         query = "SELECT * FROM Movies WHERE 1=1"
         if genre:
             query += f" AND genre='{genre}'"
         if classification:
             query += f" AND classification='{classification}'"
         if language:
-            query += f" AND language='{language}'"
+            query += f" AND Languaje='{language}'"
+        if title:
+            query += f" AND title LIKE '%{title}%'"
         result = self.db_connection.execute_query(query)
         if result:
             return [Movie(*row) for row in result]
