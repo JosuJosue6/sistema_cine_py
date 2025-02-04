@@ -45,7 +45,7 @@ Este proyecto es un sistema de reserva de entradas de cine creado con Python y T
    D:\user\Escritorio\Josue\JosuJosue\Proyectos\sistema_cine_py>
 
    SI no esta asi, usa el siguiente comando en la consola
-   cd movie-ticket-booking
+   cd sistema_cine_py
    ```
 
 3. Instala las dependencias requeridas:

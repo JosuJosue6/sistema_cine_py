@@ -77,7 +77,7 @@ class TicketSelectionView(Frame):
         self.footer = Frame(self.master, bg="#333333", height=50)
         self.footer.pack(side="bottom", fill="x")
 
-        self.footer_label = Label(self.footer, text="© 2025 Sistema de Cine. Todos los derechos reservados.", font=("Arial", 10), bg="#333333", fg="black")
+        self.footer_label = Label(self.footer, text="© 2025 Sistema de Cine. Todos los derechos reservados.", font=("Helvetica", 10), bg="#333333", fg="white")
         self.footer_label.pack(pady=10)
 
     # Método para confirmar el número de boletos

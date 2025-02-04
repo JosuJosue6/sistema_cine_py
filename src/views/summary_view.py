@@ -7,6 +7,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 import os
 from controllers.user_controller import UserController  # Asegúrate de tener un controlador de usuario para obtener el correo electrónico del usuario
+from PIL import Image, ImageTk, ImageDraw  # Necesitarás instalar Pillow para manejar imágenes
 
 class SummaryView(Frame):
     def __init__(self, master, purchase_summary, db_connection):
@@ -19,9 +20,31 @@ class SummaryView(Frame):
 
     def init_ui(self):
         self.master.title("Resumen de Compra")
-        # Maximizar la ventana
-        self.master.state('zoomed')
         self.master.configure(bg="#ffffff")  # Fondo blanco
+
+        # Barra de navegación
+        self.navbar = Frame(self.master, bg="#333333", height=70)  # Fondo gris oscuro
+        self.navbar.pack(side="top", fill="x")
+
+        self.navbar_label = Label(self.navbar, text="Sistema de CINE", font=("Helvetica", 24, "bold"), bg="#333333", fg="white", padx=10)
+        self.navbar_label.pack(side="left", padx=(10, 400), pady=10)
+
+        # Cargar la imagen para la navbar
+        if os.path.exists("src/assets/movies/movie1.jpg"):  # Reemplaza con la ruta de tu imagen
+            navbar_image = Image.open("src/assets/movies/movie1.jpg")
+            navbar_image = navbar_image.resize((50, 50), Image.LANCZOS)  # Usar Image.LANCZOS en lugar de Image.ANTIALIAS
+
+            # Crear una máscara circular
+            mask = Image.new("L", navbar_image.size, 0)
+            draw = ImageDraw.Draw(mask)
+            draw.ellipse((0, 0) + navbar_image.size, fill=255)
+            navbar_image.putalpha(mask)
+
+            navbar_photo = ImageTk.PhotoImage(navbar_image)
+
+            self.navbar_image_label = Label(self.navbar, image=navbar_photo, bg="#333333")
+            self.navbar_image_label.image = navbar_photo  # Guardar una referencia para evitar que la imagen sea recolectada por el garbage collector
+            self.navbar_image_label.pack(side="right", padx=10, pady=10)
 
         self.title_label = Label(self.master, text="Resumen de Compra", font=("Arial", 24, "bold"), bg="#ffffff", fg="black")
         self.title_label.pack(pady=10)
@@ -48,7 +71,7 @@ class SummaryView(Frame):
         self.footer = Frame(self.master, bg="#333333", height=50)
         self.footer.pack(side="bottom", fill="x")
 
-        self.footer_label = Label(self.footer, text="© 2025 Sistema de Cine. Todos los derechos reservados.", font=("Arial", 10), bg="#333333", fg="black")
+        self.footer_label = Label(self.footer, text="© 2025 Sistema de Cine. Todos los derechos reservados.", font=("Helvetica", 10), bg="#333333", fg="white")
         self.footer_label.pack(pady=10)
 
     def confirm_purchase(self):
