@@ -1,62 +1,136 @@
-from tkinter import Frame, Label, Listbox, Button, StringVar, Entry, END, messagebox
+from tkinter import Frame, Label, Button, Listbox, StringVar, Entry, messagebox, Toplevel, Radiobutton, IntVar
+from views.promotions_view import PromotionsView  # Asegúrate de importar la clase PromotionsView
+from PIL import Image, ImageTk  # Necesitarás instalar Pillow para manejar imágenes
+import os
+from controllers.combo_controller import ComboController
 
-class ComboSelectionView(Frame):
-    def __init__(self, master=None):
+class CombosSelectionView(Frame):
+    def __init__(self, master, movie, selected_seats, db_connection):
         super().__init__(master)
         self.master = master
-        self.pack()
-        self.create_widgets()
+        self.movie = movie
+        self.selected_seats = selected_seats
+        self.db_connection = db_connection
+        self.combo_controller = ComboController(db_connection)
         self.combos = self.load_combos()
+        self.selected_combos = []
+        self.total_price = 0.0
 
-    # Método para crear los widgets de la interfaz
-    def create_widgets(self):
-        
-        self.title_label = Label(self, text="Seleccione sus Combos", font=("Arial", 16))
+        self.init_ui()
+
+    # Método para inicializar la interfaz
+    def init_ui(self):
+        # Maximizar la ventana
+        self.master.state('zoomed')
+        self.master.configure(bg="#000000")  # Fondo negro
+
+        # Barra de navegación
+        self.navbar = Frame(self.master, bg="#333333", height=70)  # Fondo gris oscuro
+        self.navbar.pack(side="top", fill="x")
+
+        self.navbar_label = Label(self.navbar, text="Sistema de CINE", font=("Helvetica", 24, "bold"), bg="#333333", fg="white", padx=10)
+        self.navbar_label.pack(side="left", padx=(10, 400), pady=10)
+
+        # Cargar la imagen para la navbar
+        if os.path.exists("src/assets/Screenshot 2024-07-14 232103.png"):  # Reemplaza con la ruta de tu imagen
+            navbar_image = Image.open("src/assets/Screenshot 2024-07-14 232103.png")
+            navbar_image = navbar_image.resize((50, 50), Image.LANCZOS)  # Usar Image.LANCZOS en lugar de Image.ANTIALIAS
+            navbar_photo = ImageTk.PhotoImage(navbar_image)
+
+            self.navbar_image_label = Label(self.navbar, image=navbar_photo, bg="#333333")
+            self.navbar_image_label.image = navbar_photo  # Guardar una referencia para evitar que la imagen sea recolectada por el garbage collector
+            self.navbar_image_label.pack(side="right", padx=10, pady=10)
+
+        self.title_label = Label(self, text=f"Selecciona tus combos para: {self.movie.title}", font=("Helvetica", 18, "bold"), bg="#000000", fg="white")
         self.title_label.pack(pady=10)
 
-        #listbox para mostrar los combos disponibles
-        self.combo_listbox = Listbox(self, selectmode='multiple')
+        self.combo_listbox = Listbox(self, selectmode="multiple", width=50, font=("Helvetica", 14), bg="#1a1a1a", fg="white", bd=2, relief="groove")
+        self.combo_listbox.bind('<<ListboxSelect>>', self.update_total_price)
+        for combo in self.combos:
+            self.combo_listbox.insert("end", f"{combo.description} - ${combo.price:.2f}")
         self.combo_listbox.pack(pady=10)
 
-        self.customization_label = Label(self, text="Personalización (opcional):")
-        self.customization_label.pack(pady=5)
+        self.total_price_label = Label(self, text=f"Precio total estimado: ${self.total_price:.2f}", font=("Helvetica", 16, "bold"), bg="#000000", fg="white")
+        self.total_price_label.pack(pady=10)
 
-        self.extra_popcorn_var = StringVar()
-        self.extra_popcorn_entry = Entry(self, textvariable=self.extra_popcorn_var)
-        self.extra_popcorn_entry.pack(pady=5)
-        self.extra_popcorn_entry.insert(0, "Extra de palomitas (cantidad)")
-
-        self.submit_button = Button(self, text="Agregar Combos", command=self.add_combos)
-        self.submit_button.pack(pady=10)
-
-        self.summary_button = Button(self, text="Ver Resumen", command=self.show_summary)
+        self.summary_button = Button(self, text="Continuar", command=self.show_customization_window, font=("Helvetica", 14, "bold"), bg="#1a1a1a", fg="white", bd=2, relief="raised")
         self.summary_button.pack(pady=10)
-    
-    #cargar los combos desde la base de datos
+
+        # Pie de página
+        self.footer = Frame(self.master, bg="#333333", height=50)
+        self.footer.pack(side="bottom", fill="x")
+
+        self.footer_label = Label(self.footer, text="© 2025 Sistema de Cine. Todos los derechos reservados.", font=("Helvetica", 10), bg="#333333", fg="white")
+        self.footer_label.pack(pady=10)
+
+    # Método para cargar los combos desde la base de datos
     def load_combos(self):
-        # Simulación de carga de combos desde la base de datos
-        return [
-            {"id": 1, "description": "Combo 1: Palomitas grandes + 2 refrescos", "price": 10.00},
-            {"id": 2, "description": "Combo 2: Nachos + 1 refresco", "price": 8.00},
-            {"id": 3, "description": "Combo 3: Palomitas medianas + 1 refresco", "price": 7.00},
-        ]
+        combos = self.combo_controller.get_combos()
+        for combo in combos:
+            print(combo)  
+        return combos
 
-    # metodo para agregar los combos seleccionados
-    def add_combos(self):
+    # Método para actualizar el precio total
+    def update_total_price(self, event=None):
         selected_indices = self.combo_listbox.curselection()
-        selected_combos = [self.combos[i] for i in selected_indices]
-        extra_popcorn = self.extra_popcorn_var.get()
+        self.total_price = sum(self.combos[i].price for i in selected_indices)
+        self.total_price_label.config(text=f"Precio total estimado: ${self.total_price:.2f}")
 
-        if selected_combos:
-            messagebox.showinfo("Combos Agregados", f"Combos seleccionados: {selected_combos}\nExtra de palomitas: {extra_popcorn}")
-        else:
-            messagebox.showwarning("Advertencia", "Por favor, seleccione al menos un combo.")
+    # Método para mostrar la ventana de personalización
+    def show_customization_window(self):
+        customization_window = Toplevel(self.master)
+        customization_window.title("Personalizar Combo")
+        customization_window.geometry("400x400")
+        customization_window.configure(bg="#000000")
 
-    #metodo para mostrar el resumen de la compra
+        Label(customization_window, text="Personalizar Combo", font=("Helvetica", 18, "bold"), bg="#000000", fg="white").pack(pady=10)
+
+        # Opciones de palomitas
+        Label(customization_window, text="Palomitas:", font=("Helvetica", 14), bg="#000000", fg="white").pack(pady=5)
+        self.popcorn_size = IntVar()
+        self.popcorn_size.trace("w", self.calculate_total_price)  # Actualizar precio en tiempo real
+        Radiobutton(customization_window, text="Pequeñas (+$1)", variable=self.popcorn_size, value=1, bg="#000000", fg="white", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
+        Radiobutton(customization_window, text="Normales (+$2)", variable=self.popcorn_size, value=2, bg="#000000", fg="white", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
+        Radiobutton(customization_window, text="Grandes (+$3)", variable=self.popcorn_size, value=3, bg="#000000", fg="white", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
+
+        # Opciones de bebidas
+        Label(customization_window, text="Bebidas:", font=("Helvetica", 14), bg="#000000", fg="white").pack(pady=5)
+        self.drink_size = IntVar()
+        self.drink_size.trace("w", self.calculate_total_price)  # Actualizar precio en tiempo real
+        Radiobutton(customization_window, text="Pequeñas (+$1)", variable=self.drink_size, value=1, bg="#000000", fg="white", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
+        Radiobutton(customization_window, text="Normales (+$2)", variable=self.drink_size, value=2, bg="#000000", fg="white", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
+        Radiobutton(customization_window, text="Grandes (+$3)", variable=self.drink_size, value=3, bg="#000000", fg="white", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
+
+        self.custom_total_price_label = Label(customization_window, text=f"Precio total estimado: ${self.total_price:.2f}", font=("Helvetica", 16, "bold"), bg="#000000", fg="white")
+        self.custom_total_price_label.pack(pady=10)
+
+        Button(customization_window, text="Calcular Precio Total", command=self.open_promotions_view, font=("Helvetica", 14, "bold"), bg="#1a1a1a", fg="white", bd=2, relief="raised").pack(pady=20)
+
+    # Método para calcular el precio total con personalización
+    def calculate_total_price(self, *args):
+        extra_price = self.popcorn_size.get() + self.drink_size.get()
+        total_price = self.total_price + extra_price
+        self.custom_total_price_label.config(text=f"Precio total estimado: ${total_price:.2f}")
+
+    # Método para mostrar el resumen
     def show_summary(self):
-        # Aquí se mostraría el resumen de la compra
-        messagebox.showinfo("Resumen de Compra", "Aquí se mostraría el resumen de la compra.")
+        # Abrir la vista de promociones
+        self.open_promotions_view()
 
-    #metodo para iniciar la interfaz
+    # Método para abrir la vista de promociones
+    def open_promotions_view(self):
+        purchase_summary = {
+            'movie': self.movie.title,
+            'ticket_count': len(self.selected_seats),
+            'seats': [f"{seat.row}{seat.number}" for seat in self.selected_seats],
+            'combos': [self.combos[i].description for i in self.combo_listbox.curselection()],
+            'promotions': [],
+            'total': self.total_price
+        }
+        promotions_window = Toplevel(self.master)
+        promotions_view = PromotionsView(promotions_window, purchase_summary,self.db_connection)
+        promotions_view.pack()
+
     def run(self):
-        self.mainloop()
+        self.pack()
+        self.master.mainloop()

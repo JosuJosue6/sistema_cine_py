@@ -20,3 +20,7 @@ class Seat:
     #liberar el asiento
     def release(self):
         self.availability = True
+
+    #retornar un string con la informacion del asiento
+    def __str__(self):
+        return f"Room: {self.room}, Row: {self.row}, Number: {self.number}, Availability: {self.availability}"

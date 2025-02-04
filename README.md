@@ -52,8 +52,9 @@ Este proyecto es un sistema de reserva de entradas de cine creado con Python y T
    ```
    pip install -r requirements.txt
    ```
+4. Usa el archivo SQL en el Management Studio (2012)
 
-4. Ejecuta la aplicacion:
+5. Ejecuta la aplicacion:
    ```
    python src/main.py
    ```

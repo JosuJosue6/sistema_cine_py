@@ -5,7 +5,7 @@ from views.movie_list_view import MovieListView
 def main():
     root = Tk()
     root.title("Test")
-    root.geometry("800x600")
+    root.geometry("1800x1080")
 
     # Conexión a la DB
     server = r'JOSUJOSUELAPTOP\SQLEXPRESS'

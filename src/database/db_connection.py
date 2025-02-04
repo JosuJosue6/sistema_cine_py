@@ -8,7 +8,7 @@ class DatabaseConnection:
         self.password = password
         self.connection = None
 
-    #coneccion a la base de datos
+    # Conexión a la base de datos
     def connect(self):
         try:
             self.connection = pyodbc.connect(
@@ -18,7 +18,7 @@ class DatabaseConnection:
         except Exception as e:
             print(f"Error connecting to database: {e}")
 
-    #ejecutar una query
+    # Ejecutar una query
     def execute_query(self, query, params=None):
         try:
             cursor = self.connection.cursor()
@@ -33,7 +33,7 @@ class DatabaseConnection:
             print(f"Error executing query: {e}")
             return None
 
-    #cerrar la conexion
+    # Cerrar la conexión
     def close(self):
         if self.connection:
             self.connection.close()

@@ -1,23 +1,45 @@
+from models.seat import Seat
+
 class SeatController:
-    def __init__(self, seat_model):
-        self.seat_model = seat_model
+    def __init__(self, db_connection):
+        self.db_connection = db_connection
 
-    #obtener todos los asientos disponibles
-    def get_available_seats(self, room):
-        return self.seat_model.get_available_seats(room)
+    # Obtener todos los asientos disponibles
+    def get_seats(self):
+        query = "SELECT * FROM seats"
+        result = self.db_connection.execute_query(query)
+        if result is None:
+            print("No se obtuvieron resultados de la consulta.")
+            return []
+        print(f"Resultados de la consulta: {result}")
+        seats = [Seat(row[1], row[2], row[3]) for row in result]
+        return seats
 
-    #reservar un asiento
+    # Obtener todos los asientos disponibles
+    def get_available_seats(self):
+        query = "SELECT * FROM seats WHERE available = 1"
+        result = self.db_connection.execute_query(query)
+        if result is None:
+            print("No se obtuvieron resultados de la consulta.")
+            return []
+        print(f"Resultados de la consulta: {result}")
+        seats = [Seat(row[0], row[1], row[2], row[3]) for row in result]
+        return seats
+
+    # Reservar un asiento
     def reserve_seat(self, room, row, number):
-        if self.seat_model.is_seat_available(room, row, number):
-            self.seat_model.reserve_seat(room, row, number)
-            return True
-        return False
+        query = "UPDATE seats SET available = 0 WHERE room = ? AND row = ? AND number = ? AND available = 1"
+        params = (room, row, number)
+        result = self.db_connection.execute_query(query, params)
+        return result.rowcount > 0
 
-    #liberar un asiento
+    # Liberar un asiento
     def release_seat(self, room, row, number):
-        self.seat_model.release_seat(room, row, number)
+        query = "UPDATE seats SET available = 1 WHERE room = ? AND row = ? AND number = ?"
+        params = (room, row, number)
+        self.db_connection.execute_query(query, params)
 
-    #validar la seleccion de asientos
+    # Validar la selección de asientos
     def validate_seat_selection(self, room, selected_seats):
         available_seats = self.get_available_seats(room)
         return all(seat in available_seats for seat in selected_seats)

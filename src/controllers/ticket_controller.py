@@ -7,7 +7,10 @@ class TicketController:
     def get_ticket_types(self):
         # Fetch ticket types and prices from the database
         query = "SELECT type, price FROM tickets"
-        return self.db_connection.execute_query(query)
+        result = self.db_connection.execute_query(query)
+        # Convertir el resultado a una lista de diccionarios
+        ticket_types = [{'type': row[0], 'price': row[1]} for row in result]
+        return ticket_types
 
     #calcular el precio total de un ticket
     def calculate_price(self, ticket_type, quantity, promotions):
