@@ -6,10 +6,11 @@ from PIL import Image, ImageTk, ImageDraw  # Necesitarás instalar Pillow para m
 import os
 
 class PromotionsView(Frame):
-    def __init__(self, master=None, purchase_summary=None, database=None, user_email=None):
+    def __init__(self, master=None, purchase_summary=None, database=None, user_email=None, ticket_price=None):
         super().__init__(master)
         self.master = master
         self.db = database
+        self.ticket_price = ticket_price
         self.user_email = user_email
         self.purchase_summary = purchase_summary if purchase_summary is not None else {
             'movie': '',
@@ -87,7 +88,18 @@ class PromotionsView(Frame):
             # Aplicar el descuento al total
             discount = Decimal(selected_promotion.split('-')[-1].strip('% off'))
             self.purchase_summary['total'] = Decimal(self.purchase_summary['total'])  # Convertir a Decimal si no lo es
-            self.purchase_summary['total'] -= self.purchase_summary['total'] * (discount / Decimal('100'))
+
+            # Si se selecciona la primera o tercera opción
+            if selected_index == 0 or selected_index == 2:
+                discounted_amount = (self.purchase_summary['total'] - self.ticket_price) * (discount / Decimal('100'))
+                self.purchase_summary['total'] -= discounted_amount
+            # Si se selecciona la segunda opción
+            elif selected_index == 1:
+               discounted_amount = self.ticket_price * (discount / Decimal('100'))
+               self.purchase_summary['total'] -= discounted_amount
+            else:
+                self.purchase_summary['total'] -= self.purchase_summary['total'] * (discount / Decimal('100'))
+
             # Abrir la vista de resumen
             self.open_summary_view()
         except IndexError:

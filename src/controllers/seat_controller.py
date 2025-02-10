@@ -26,9 +26,18 @@ class SeatController:
         seats = [Seat(row[0], row[1], row[2], row[3]) for row in result]
         return seats
 
+    def is_available(self, room, row, number):
+        query = "SELECT available FROM seats WHERE room = ? AND row = ? AND number = ?"
+        params = (room, row, number)
+        result = self.db_connection.execute_query(query, params)
+        if result is None:
+            print("No se obtuvieron resultados de la consulta.")
+            return False
+        return True
+
     # Reservar un asiento
     def reserve_seat(self, room, row, number):
-        query = "UPDATE seats SET available = 0 WHERE room = ? AND row = ? AND number = ? AND available = 1"
+        query = "UPDATE Seats SET available = 0 WHERE room = ? AND row = ? AND number = ? AND available = 1"
         params = (room, row, number)
         try:
             result = self.db_connection.execute_query(query, params)

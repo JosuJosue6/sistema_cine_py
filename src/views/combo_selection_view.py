@@ -17,7 +17,7 @@ class CombosSelectionView(Frame):
         self.combo_controller = ComboController(db_connection)
         self.combos = self.load_combos()
         self.selected_combos = []
-        self.total_price = 0.0
+        self.total_price = subtotal
 
         self.init_ui()
 
@@ -64,6 +64,9 @@ class CombosSelectionView(Frame):
             self.combo_listbox.insert("end", f"{combo.description} - ${combo.price:.2f}")
         self.combo_listbox.pack(pady=10)
 
+        self.subtotal_label = Label(self.container, text=f"Costo de boletos: ${self.subtotal:.2f}", font=("Helvetica", 16, "bold"), bg="#ffffff", fg="black")
+        self.subtotal_label.pack(pady=10)
+
         self.total_price_label = Label(self.container, text=f"Precio total estimado: ${self.total_price:.2f}", font=("Helvetica", 16, "bold"), bg="#ffffff", fg="black")
         self.total_price_label.pack(pady=10)
 
@@ -87,17 +90,24 @@ class CombosSelectionView(Frame):
     # Método para actualizar el precio total
     def update_total_price(self, event=None):
         selected_indices = self.combo_listbox.curselection()
-        self.total_price = self.subtotal + sum(self.combos[i].price for i in selected_indices)
+        if not selected_indices:
+            self.total_price = self.subtotal
+        else:
+            self.total_price = self.subtotal + sum(self.combos[i].price for i in selected_indices)
         self.total_price_label.config(text=f"Precio total estimado: ${self.total_price:.2f}")
 
     # Método para mostrar la ventana de personalización
     def show_customization_window(self):
+        selected_indices = self.combo_listbox.curselection()
+        if not selected_indices:
+            pass
+
         customization_window = Toplevel(self.master)
-        customization_window.title("Personalizar Combo")
-        customization_window.geometry("400x400")
+        customization_window.title("Adicionales")
+        customization_window.geometry("600x600")
         customization_window.configure(bg="#ffffff")
 
-        Label(customization_window, text="Personalizar Combo", font=("Helvetica", 18, "bold"), bg="#ffffff", fg="black").pack(pady=10)
+        Label(customization_window, text="Adicionales", font=("Helvetica", 18, "bold"), bg="#ffffff", fg="black").pack(pady=10)
 
         # Opciones de palomitas
         Label(customization_window, text="Palomitas:", font=("Helvetica", 14), bg="#ffffff", fg="black").pack(pady=5)
@@ -143,7 +153,7 @@ class CombosSelectionView(Frame):
             'total': self.total_price
         }
         promotions_window = Toplevel(self.master)
-        promotions_view = PromotionsView(promotions_window, purchase_summary, self.db_connection, self.email)
+        promotions_view = PromotionsView(promotions_window, purchase_summary, self.db_connection, self.email, self.subtotal)
         promotions_view.pack()
         promotions_window.protocol("WM_DELETE_WINDOW", lambda: (self.master.deiconify(), promotions_window.destroy()))  # Mostrar la ventana principal cuando se cierre la nueva ventana
 

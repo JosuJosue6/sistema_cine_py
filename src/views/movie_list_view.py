@@ -304,16 +304,6 @@ class MovieListView(Frame):
     def open_ticket_selection(self, movie):
         
         self.master.destroy()  # Cerrar la ventana de MovieListView
-        purchase_info = {
-            'movie': movie,
-            'ticket_count': 0,
-            'seats': [],
-            'combos': [],
-            'promotions': [],
-            'total': 0.0,
-            'payment_method': '',
-            'email': self.user_email
-        }
         ticket_selection_window = Tk()
         ticket_selection_view = TicketSelectionView(ticket_selection_window, self.movie_controller.db_connection, movie,self.email)
         ticket_selection_view.pack(fill="both", expand=True)

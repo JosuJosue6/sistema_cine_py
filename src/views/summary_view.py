@@ -72,8 +72,8 @@ class SummaryView(Frame):
         self.confirm_button = Button(self.container, text="Confirmar Compra", command=self.confirm_purchase, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
         self.confirm_button.pack(pady=20)
 
-        self.new_purchase_button = Button(self.container, text="Realizar Nueva Compra", command=self.new_purchase, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
-        self.new_purchase_button.pack(pady=10)
+        #self.new_purchase_button = Button(self.container, text="Realizar Nueva Compra", command=self.new_purchase, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
+        #self.new_purchase_button.pack(pady=10)
         self.new_purchase_button.pack_forget()  # Ocultar inicialmente
 
         self.exit_button = Button(self.container, text="Salir", command=self.master.quit, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
@@ -92,8 +92,8 @@ class SummaryView(Frame):
         pdf_path = "purchase_summary.pdf"
         self.generate_pdf(pdf_path)
 
-        # Generar el código QR con el enlace al PDF
-        qr_data = f"file://{os.path.abspath(pdf_path)}"
+        # Generar el código QR con los detalles de la compra en texto
+        qr_data = f"Película: {self.purchase_summary['movie']}\nAsientos: {', '.join(self.purchase_summary['seats'])}\nCombos: {', '.join(self.purchase_summary['combos'])}\nPromociones aplicadas: {', '.join(self.purchase_summary['promotions'])}\nTotal a pagar: ${self.purchase_summary['total']:.2f}"
         qr = qrcode.make(qr_data)
         qr_path = "purchase_qr.png"
         qr.save(qr_path)
