@@ -124,6 +124,6 @@ VALUES
 ('Combo 3: palomitas y soda grande', 10.00),
 ('Combo 4: palomitas grandes y soda grande', 12.00);
 
-INSERT INTO Users (Name, Email, PurchaseHistory)
+INSERT INTO Users (Name, Email, PurchaseHistory, Password)
 VALUES 
 ('John Doe', 'john@example.com', 'None');

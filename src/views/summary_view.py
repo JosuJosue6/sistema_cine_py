@@ -1,15 +1,12 @@
-from tkinter import Frame, Label, Button, messagebox
+import base64
+from tkinter import Frame, Label, Button, messagebox, Toplevel
 import qrcode
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
-from email import encoders
 import os
 from controllers.user_controller import UserController  
 from PIL import Image, ImageTk, ImageDraw  
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from mailjet_rest import Client
 
 class SummaryView(Frame):
     def __init__(self, master, purchase_summary, db_connection, user_email):
@@ -71,6 +68,12 @@ class SummaryView(Frame):
         self.confirm_button = Button(self.master, text="Confirmar Compra", command=self.confirm_purchase, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
         self.confirm_button.pack(pady=20)
 
+        self.new_purchase_button = Button(self.master, text="Realizar Nueva Compra", command=self.new_purchase, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
+        self.new_purchase_button.pack(pady=10)
+
+        self.exit_button = Button(self.master, text="Salir", command=self.master.quit, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
+        self.exit_button.pack(pady=10)
+
         # Pie de página
         self.footer = Frame(self.master, bg="#333333", height=50)
         self.footer.pack(side="bottom", fill="x")
@@ -79,22 +82,25 @@ class SummaryView(Frame):
         self.footer_label.pack(pady=10)
 
     def confirm_purchase(self):
-        # Generar el código QR con la información del resumen
-        qr_data = f"Película: {self.purchase_summary['movie']}\nAsientos: {', '.join(self.purchase_summary['seats'])}\nCombos: {', '.join(self.purchase_summary['combos'])}\nTotal: ${self.purchase_summary['total']:.2f}"
+        # Generar el PDF con la información del resumen y el código QR
+        pdf_path = "purchase_summary.pdf"
+        self.generate_pdf(pdf_path)
+
+        # Generar el código QR con el enlace al PDF
+        qr_data = f"file://{os.path.abspath(pdf_path)}"
         qr = qrcode.make(qr_data)
         qr_path = "purchase_qr.png"
         qr.save(qr_path)
 
-        # Generar el PDF con la información del resumen y el código QR
-        pdf_path = "purchase_summary.pdf"
-        self.generate_pdf(pdf_path, qr_path)
-
         # Enviar el correo electrónico con el PDF adjunto
-        self.send_email(self.user_email, pdf_path)
+        self.send_email(self.user_email, pdf_path, qr_path)
 
         messagebox.showinfo("Confirmación", "Compra confirmada y correo enviado con el PDF de la factura.")
 
-    def generate_pdf(self, pdf_path, qr_path):
+        # Desactivar el botón de confirmar compra
+        self.confirm_button.config(state="disabled")
+
+    def generate_pdf(self, pdf_path):
         c = canvas.Canvas(pdf_path, pagesize=letter)
         width, height = letter
 
@@ -111,6 +117,7 @@ class SummaryView(Frame):
         c.drawString(100, height - 230, f"Total a pagar: ${self.purchase_summary['total']:.2f}")
 
         # Código QR
+        qr_path = "purchase_qr.png"
         c.drawImage(qr_path, 100, height - 400, width=200, height=200)
 
         # Información adicional de la factura
@@ -123,32 +130,60 @@ class SummaryView(Frame):
 
         c.save()
 
-    def send_email(self, to_email, pdf_path):
+    def send_email(self, to_email, pdf_path, qr_path):
+        api_key = "173d140b1aa3661cc8b4c5128fce73e7"
+        api_secret = "90ab1e9875b79c52e61e01aaeb403f11"
         from_email = "testpruebasvsc@gmail.com"
-        from_password = "tu_contraseña"
         subject = "Confirmación de Compra - Sistema de Cine"
-
-        msg = MIMEMultipart()
-        msg['From'] = from_email
-        msg['To'] = to_email
-        msg['Subject'] = subject
-
         body = "Gracias por tu compra. Adjuntamos el PDF con los detalles de tu compra y el código QR."
-        msg.attach(MIMEText(body, 'plain'))
 
-        attachment = open(pdf_path, "rb")
-        part = MIMEBase('application', 'octet-stream')
-        part.set_payload(attachment.read())
-        encoders.encode_base64(part)
-        part.add_header('Content-Disposition', f"attachment; filename= {os.path.basename(pdf_path)}")
-        msg.attach(part)
+        mailjet = Client(auth=(api_key, api_secret), version='v3.1')
+        data = {
+            'Messages': [
+                {
+                    "From": {
+                        "Email": from_email,
+                        "Name": "Sistema de Cine"
+                    },
+                    "To": [
+                        {
+                            "Email": to_email,
+                            "Name": "Cliente"
+                        }
+                    ],
+                    "Subject": subject,
+                    "TextPart": body,
+                    "Attachments": [
+                        {
+                            "ContentType": "application/pdf",
+                            "Filename": os.path.basename(pdf_path),
+                            "Base64Content": base64.b64encode(open(pdf_path, "rb").read()).decode('utf-8')
+                        },
+                        {
+                            "ContentType": "image/png",
+                            "Filename": os.path.basename(qr_path),
+                            "Base64Content": base64.b64encode(open(qr_path, "rb").read()).decode('utf-8')
+                        }
+                    ]
+                }
+            ]
+        }
 
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login(from_email, from_password)
-        text = msg.as_string()
-        server.sendmail(from_email, to_email, text)
-        server.quit()
+        result = mailjet.send.create(data=data)
+        if result.status_code == 200:
+            print("Correo enviado exitosamente")
+        else:
+            messagebox.showerror("Error de Envío", "No se pudo enviar el correo electrónico. Verifica tu configuración.")
+            print(f"Error: {result.status_code}")
+            print(result.json())
+
+    def new_purchase(self):
+        self.master.withdraw()  # Ocultar la ventana de SummaryView
+        from views.movie_list_view import MovieListView  # Importación diferida
+        movie_list_window = Toplevel(self.master)
+        movie_list_view = MovieListView(movie_list_window, self.db_connection, self.user_email)
+        movie_list_view.pack()
+        movie_list_window.protocol("WM_DELETE_WINDOW", lambda: (self.master.deiconify(), movie_list_window.destroy()))  # Mostrar la ventana principal cuando se cierre la nueva ventana
 
     def run(self):
         self.pack()

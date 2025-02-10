@@ -5,9 +5,10 @@ import os
 from views.ticket_selection_view import TicketSelectionView
 
 class MovieListView(Frame):
-    def __init__(self, master=None, db_connection=None):
+    def __init__(self, master=None, db_connection=None, email =None):
         super().__init__(master)
         self.master = master
+        self.email = email
         self.movie_controller = MovieController(db_connection)
         self.selected_movie = StringVar()
         self.genre_var = StringVar(value="Género")
@@ -280,7 +281,7 @@ class MovieListView(Frame):
 
         # Frame para contener los botones
         button_frame = Frame(popup)
-        button_frame.pack(pady=500)  # Asegurar que el frame de botones esté en la parte inferior
+        button_frame.pack(pady=300)  # Asegurar que el frame de botones esté en la parte inferior
 
         # Botón para cerrar la ventana emergente
         close_button = Button(button_frame, text="Regresar", command=popup.destroy, font=("Helvetica", 14, "bold"), bg="#1a1a1a", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
@@ -303,6 +304,6 @@ class MovieListView(Frame):
     def open_ticket_selection(self, movie):
         self.master.destroy()  # Cerrar la ventana de MovieListView
         ticket_selection_window = Tk()
-        ticket_selection_view = TicketSelectionView(ticket_selection_window, self.movie_controller.db_connection, movie)
+        ticket_selection_view = TicketSelectionView(ticket_selection_window, self.movie_controller.db_connection, movie,self.email)
         ticket_selection_view.pack(fill="both", expand=True)
         ticket_selection_window.mainloop()

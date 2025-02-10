@@ -6,10 +6,11 @@ from PIL import Image, ImageTk, ImageDraw  # Necesitarás instalar Pillow para m
 import os
 
 class SeatSelectionView(Frame):
-    def __init__(self, master, movie, db_connection, ticket_count, subtotal, payment_method):
+    def __init__(self, master, movie, db_connection, ticket_count, subtotal, payment_method,email):
         super().__init__(master)
         self.master = master
         self.movie = movie
+        self.email = email
         self.db_connection = db_connection
         self.seat_controller = SeatController(db_connection)
         self.ticket_count = ticket_count
@@ -124,7 +125,7 @@ class SeatSelectionView(Frame):
     def open_combos_selection(self):
         self.master.withdraw()  # Ocultar la ventana de SeatSelectionView
         combos_selection_window = Toplevel(self.master)
-        combos_selection_view = CombosSelectionView(combos_selection_window, self.movie, self.selected_seats, self.db_connection, self.subtotal, self.payment_method)
+        combos_selection_view = CombosSelectionView(combos_selection_window, self.movie, self.selected_seats, self.db_connection, self.subtotal, self.payment_method, self.email)
         combos_selection_view.pack()
         combos_selection_window.protocol("WM_DELETE_WINDOW", lambda: (self.master.deiconify(), combos_selection_window.destroy()))  # Mostrar la ventana principal cuando se cierre la nueva ventana
 

@@ -6,9 +6,10 @@ import os
 from controllers.ticket_controller import TicketController
 
 class TicketSelectionView(Frame):
-    def __init__(self, master, db_connection, movie):
+    def __init__(self, master, db_connection, movie, email):
         super().__init__(master)
         self.master = master
+        self.email = email
         self.db_connection = db_connection
         self.movie = movie
         self.ticket_controller = TicketController(db_connection)
@@ -152,7 +153,7 @@ class TicketSelectionView(Frame):
     def open_seat_selection(self):
         self.master.withdraw()  # Ocultar la ventana de TicketSelectionView
         seat_selection_window = Toplevel(self.master)
-        seat_selection_view = SeatSelectionView(seat_selection_window, self.movie, self.db_connection, self.ticket_count, self.subtotal, self.payment_method.get())
+        seat_selection_view = SeatSelectionView(seat_selection_window, self.movie, self.db_connection, self.ticket_count, self.subtotal, self.payment_method.get(), self.email)
         seat_selection_view.pack()
         seat_selection_window.protocol("WM_DELETE_WINDOW", self.master.destroy)  # Destruir la ventana principal cuando se cierre la nueva ventana
 

@@ -9,6 +9,7 @@ class LoginView(Frame):
         super().__init__(master)
         self.master = master
         self.db_connection = db_connection
+        self.email = None
         self.user_controller = UserController(db_connection)
         self.init_ui()
 
@@ -70,10 +71,10 @@ class LoginView(Frame):
         self.footer_label.pack(pady=10)
 
     def login(self):
-        email = self.email_entry.get()
+        self.email = self.email_entry.get()
         password = self.password_entry.get()
         # Validar las credenciales del usuario
-        user = self.user_controller.authenticate_user(email, password)
+        user = self.user_controller.authenticate_user(self.email, password)
         if user:
             messagebox.showinfo("Inicio de Sesión", f"Bienvenido, {user}!")
             self.open_movie_list_view()
@@ -84,6 +85,6 @@ class LoginView(Frame):
         # Destruir la vista actual antes de abrir la nueva vista
         self.master.destroy()
         movie_list_window = Tk()
-        movie_list_view = MovieListView(movie_list_window, self.db_connection)
+        movie_list_view = MovieListView(movie_list_window, self.db_connection,self.email)
         movie_list_view.pack(fill="both", expand=True)
         movie_list_window.mainloop()

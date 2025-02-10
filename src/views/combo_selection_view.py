@@ -5,10 +5,11 @@ import os
 from controllers.combo_controller import ComboController
 
 class CombosSelectionView(Frame):
-    def __init__(self, master, movie, selected_seats, db_connection, subtotal, payment_method):
+    def __init__(self, master, movie, selected_seats, db_connection, subtotal, payment_method, email):
         super().__init__(master)
         self.master = master
         self.movie = movie
+        self.email = email
         self.selected_seats = selected_seats
         self.db_connection = db_connection
         self.subtotal = subtotal  # Subtotal de los boletos
@@ -138,10 +139,11 @@ class CombosSelectionView(Frame):
             'total': self.total_price
         }
         promotions_window = Toplevel(self.master)
-        promotions_view = PromotionsView(promotions_window, purchase_summary, self.db_connection)
+        promotions_view = PromotionsView(promotions_window, purchase_summary, self.db_connection, self.email)
         promotions_view.pack()
         promotions_window.protocol("WM_DELETE_WINDOW", lambda: (self.master.deiconify(), promotions_window.destroy()))  # Mostrar la ventana principal cuando se cierre la nueva ventana
 
     def run(self):
         self.pack()
+        
         self.master.mainloop()

@@ -87,6 +87,7 @@ class PromotionsView(Frame):
             self.purchase_summary['promotions'].append(selected_promotion)
             # Aplicar el descuento al total
             discount = Decimal(selected_promotion.split('-')[-1].strip('% off'))
+            self.purchase_summary['total'] = Decimal(self.purchase_summary['total'])  # Convertir a Decimal si no lo es
             self.purchase_summary['total'] -= self.purchase_summary['total'] * (discount / Decimal('100'))
             # Abrir la vista de resumen
             self.open_summary_view()
