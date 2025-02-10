@@ -222,7 +222,7 @@ class MovieListView(Frame):
         self.movie_listbox.update_idletasks()
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
-    # Método para mostrar los detalles de una película en una ventana emergente
+    # Método para mostrar los detalles de una película en una ventana emergente********************************************************************************************
     def show_movie_details(self, movie):
         popup = Toplevel(self)
         popup.title(movie.title)

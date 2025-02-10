@@ -5,8 +5,8 @@ class UserController:
     # CRUD básico de usuarios
     # Crear un nuevo usuario
     def create_user(self, user_data):
-        query = "INSERT INTO Users (name, email, phone, password) VALUES (?, ?, ?, ?)"
-        self.db_connection.execute_query(query, (user_data['name'], user_data['email'], user_data['phone'], user_data['password']))
+        query = "INSERT INTO Users (name, email, password) VALUES (?, ?, ?)"
+        self.db_connection.execute_query(query, (user_data['name'], user_data['email'],  user_data['password']))
         self.db_connection.commit()
 
     # Buscar usuario por su ID

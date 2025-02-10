@@ -3,6 +3,7 @@ from PIL import Image, ImageTk, ImageDraw
 import os
 from controllers.user_controller import UserController
 from views.movie_list_view import MovieListView  # Importa la clase MovieListView
+from views.register_view import RegisterUserView  # Importa la clase RegisterUserView
 
 class LoginView(Frame):
     def __init__(self, master, db_connection):
@@ -11,9 +12,9 @@ class LoginView(Frame):
         self.db_connection = db_connection
         self.email = None
         self.user_controller = UserController(db_connection)
-        self.init_ui()
+        self.ventana()
 
-    def init_ui(self):
+    def ventana(self):
         self.master.title("Inicio de Sesión")
         # Maximizar la ventana
         self.master.state('zoomed')
@@ -60,6 +61,9 @@ class LoginView(Frame):
         self.login_button = Button(self.inner_frame, text="Iniciar Sesión", command=self.login, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
         self.login_button.pack(pady=20)
 
+        self.register_button = Button(self.inner_frame, text="Registrar", command=self.open_register_view, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
+        self.register_button.pack(pady=10)
+
         # Vincular la tecla "Enter" al método login
         self.master.bind('<Return>', lambda event: self.login())
 
@@ -76,7 +80,7 @@ class LoginView(Frame):
         # Validar las credenciales del usuario
         user = self.user_controller.authenticate_user(self.email, password)
         if user:
-            messagebox.showinfo("Inicio de Sesión", f"Bienvenido, {user}!")
+            messagebox.showinfo("Inicio de Sesión", f"Bienvenido !")
             self.open_movie_list_view()
         else:
             messagebox.showerror("Error", "Correo electrónico o contraseña incorrectos.")
@@ -85,6 +89,24 @@ class LoginView(Frame):
         # Destruir la vista actual antes de abrir la nueva vista
         self.master.destroy()
         movie_list_window = Tk()
-        movie_list_view = MovieListView(movie_list_window, self.db_connection,self.email)
+        movie_list_view = MovieListView(movie_list_window, self.db_connection, self.email)
         movie_list_view.pack(fill="both", expand=True)
         movie_list_window.mainloop()
+
+    def open_register_view(self):
+        # Abrir la vista de registro de usuario
+        register_window = Toplevel(self.master)
+        register_view = RegisterUserView(register_window, self.db_connection)
+        register_view.pack(fill="both", expand=True)
+        register_window.mainloop()
+
+# Ejemplo de uso
+if __name__ == "__main__":
+    from tkinter import Tk
+    from db_connection import DBConnection  # Asegúrate de tener una clase DBConnection para manejar la conexión a la base de datos
+
+    root = Tk()
+    db_connection = DBConnection()  # Inicializa tu conexión a la base de datos
+    app = LoginView(root, db_connection)
+    app.pack(fill="both", expand=True)
+    root.mainloop()
