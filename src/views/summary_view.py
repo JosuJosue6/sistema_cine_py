@@ -31,8 +31,8 @@ class SummaryView(Frame):
         self.navbar_label.pack(side="left", padx=(10, 400), pady=10)
 
         # Cargar la imagen para la navbar
-        if os.path.exists("src/assets/movies/movie1.jpg"):  # Reemplaza con la ruta de tu imagen
-            navbar_image = Image.open("src/assets/movies/movie1.jpg")
+        if os.path.exists("src/assets/image/image.jpg"):  # Reemplaza con la ruta de tu imagen
+            navbar_image = Image.open("src/assets/image/image.jpg")
             navbar_image = navbar_image.resize((50, 50), Image.LANCZOS)  # Usar Image.LANCZOS en lugar de Image.ANTIALIAS
 
             # Crear una máscara circular
@@ -47,32 +47,38 @@ class SummaryView(Frame):
             self.navbar_image_label.image = navbar_photo  # Guardar una referencia para evitar que la imagen sea recolectada por el garbage collector
             self.navbar_image_label.pack(side="right", padx=10, pady=10)
 
-        self.title_label = Label(self.master, text="Resumen de Compra", font=("Arial", 24, "bold"), bg="#ffffff", fg="black")
+        # Contenedor central con borde negro
+        self.container = Frame(self.master, bg="#ffffff", bd=2, relief="solid", highlightbackground="black", highlightthickness=2)
+        self.container.place(relx=0.5, rely=0.5, anchor="center", width=600, height=600)
+
+        self.title_label = Label(self.container, text="Resumen de Compra", font=("Arial", 24, "bold"), bg="#ffffff", fg="black")
         self.title_label.pack(pady=10)
 
-        self.movie_label = Label(self.master, text=f"Película: {self.purchase_summary['movie']}", font=("Arial", 14), bg="#ffffff", fg="black")
+        self.movie_label = Label(self.container, text=f"Película: {self.purchase_summary['movie']}", font=("Arial", 14), bg="#ffffff", fg="black")
         self.movie_label.pack(pady=5)
 
-        self.seats_label = Label(self.master, text=f"Asientos: {', '.join(self.purchase_summary['seats'])}", font=("Arial", 14), bg="#ffffff", fg="black")
+        self.seats_label = Label(self.container, text=f"Asientos: {', '.join(self.purchase_summary['seats'])}", font=("Arial", 14), bg="#ffffff", fg="black")
         self.seats_label.pack(pady=5)
 
-        self.combos_label = Label(self.master, text=f"Combos: {', '.join(self.purchase_summary['combos'])}", font=("Arial", 14), bg="#ffffff", fg="black")
+        self.combos_label = Label(self.container, text=f"Combos: {', '.join(self.purchase_summary['combos'])}", font=("Arial", 14), bg="#ffffff", fg="black")
         self.combos_label.pack(pady=5)
 
-        self.promotions_label = Label(self.master, text=f"Promociones aplicadas: {', '.join(self.purchase_summary['promotions'])}", font=("Arial", 14), bg="#ffffff", fg="black")
+        self.promotions_label = Label(self.container, text=f"Promociones aplicadas: {', '.join(self.purchase_summary['promotions'])}", font=("Arial", 14), bg="#ffffff", fg="black")
         self.promotions_label.pack(pady=5)
 
-        self.total_label = Label(self.master, text=f"Total a pagar: ${self.purchase_summary['total']:.2f}", font=("Arial", 14), bg="#ffffff", fg="black")
+        self.total_label = Label(self.container, text=f"Total a pagar: ${self.purchase_summary['total']:.2f}", font=("Arial", 14), bg="#ffffff", fg="black")
         self.total_label.pack(pady=10)
 
-        self.confirm_button = Button(self.master, text="Confirmar Compra", command=self.confirm_purchase, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
+        self.confirm_button = Button(self.container, text="Confirmar Compra", command=self.confirm_purchase, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
         self.confirm_button.pack(pady=20)
 
-        self.new_purchase_button = Button(self.master, text="Realizar Nueva Compra", command=self.new_purchase, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
+        self.new_purchase_button = Button(self.container, text="Realizar Nueva Compra", command=self.new_purchase, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
         self.new_purchase_button.pack(pady=10)
+        self.new_purchase_button.pack_forget()  # Ocultar inicialmente
 
-        self.exit_button = Button(self.master, text="Salir", command=self.master.quit, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
+        self.exit_button = Button(self.container, text="Salir", command=self.master.quit, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
         self.exit_button.pack(pady=10)
+        self.exit_button.pack_forget()  # Ocultar inicialmente
 
         # Pie de página
         self.footer = Frame(self.master, bg="#333333", height=50)
@@ -99,6 +105,10 @@ class SummaryView(Frame):
 
         # Desactivar el botón de confirmar compra
         self.confirm_button.config(state="disabled")
+
+        # Mostrar los botones de nueva compra y salir
+        self.new_purchase_button.pack(pady=10)
+        self.exit_button.pack(pady=10)
 
     def generate_pdf(self, pdf_path):
         c = canvas.Canvas(pdf_path, pagesize=letter)

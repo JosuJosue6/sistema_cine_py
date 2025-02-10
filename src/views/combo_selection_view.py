@@ -25,7 +25,7 @@ class CombosSelectionView(Frame):
     def init_ui(self):
         # Maximizar la ventana
         self.master.state('zoomed')
-        self.master.configure(bg="#000000")  # Fondo negro
+        self.master.configure(bg="#ffffff")  # Fondo blanco
 
         # Barra de navegación
         self.navbar = Frame(self.master, bg="#333333", height=100)  # Fondo gris oscuro
@@ -35,8 +35,8 @@ class CombosSelectionView(Frame):
         self.navbar_label.pack(side="left", padx=(10, 200), pady=10)
 
         # Cargar la imagen para la navbar
-        if os.path.exists("src/assets/movies/movie1.jpg"):  # Reemplaza con la ruta de tu imagen
-            navbar_image = Image.open("src/assets/movies/movie1.jpg")
+        if os.path.exists("src/assets/image/image.jpg"):  # Reemplaza con la ruta de tu imagen
+            navbar_image = Image.open("src/assets/image/image.jpg")
             navbar_image = navbar_image.resize((60, 60), Image.LANCZOS)  # Usar Image.LANCZOS en lugar de Image.ANTIALIAS
             
             # Crear una máscara circular
@@ -51,19 +51,23 @@ class CombosSelectionView(Frame):
             self.navbar_image_label.image = navbar_photo  # Guardar una referencia para evitar que la imagen sea recolectada por el garbage collector
             self.navbar_image_label.pack(side="right", padx=10, pady=10)
 
-        self.title_label = Label(self, text=f"Selecciona tus combos para: {self.movie.title}", font=("Helvetica", 18, "bold"), bg="#000000", fg="white")
+        # Contenedor central con borde negro
+        self.container = Frame(self.master, bg="#ffffff", bd=2, relief="solid", highlightbackground="black", highlightthickness=2)
+        self.container.place(relx=0.5, rely=0.5, anchor="center", width=600, height=600)
+
+        self.title_label = Label(self.container, text=f"Selecciona tus combos para: {self.movie.title}", font=("Helvetica", 18, "bold"), bg="#ffffff", fg="black")
         self.title_label.pack(pady=10)
 
-        self.combo_listbox = Listbox(self, selectmode="multiple", width=50, font=("Helvetica", 14), bg="#1a1a1a", fg="white", bd=2, relief="groove")
+        self.combo_listbox = Listbox(self.container, selectmode="multiple", width=50, font=("Helvetica", 14), bg="#1a1a1a", fg="white", bd=2, relief="groove")
         self.combo_listbox.bind('<<ListboxSelect>>', self.update_total_price)
         for combo in self.combos:
             self.combo_listbox.insert("end", f"{combo.description} - ${combo.price:.2f}")
         self.combo_listbox.pack(pady=10)
 
-        self.total_price_label = Label(self, text=f"Precio total estimado: ${self.total_price:.2f}", font=("Helvetica", 16, "bold"), bg="#000000", fg="white")
+        self.total_price_label = Label(self.container, text=f"Precio total estimado: ${self.total_price:.2f}", font=("Helvetica", 16, "bold"), bg="#ffffff", fg="black")
         self.total_price_label.pack(pady=10)
 
-        self.summary_button = Button(self, text="Continuar", command=self.show_customization_window, font=("Helvetica", 14, "bold"), bg="#1a1a1a", fg="white", bd=2, relief="raised")
+        self.summary_button = Button(self.container, text="Continuar", command=self.show_customization_window, font=("Helvetica", 14, "bold"), bg="#333333", fg="white", bd=2, relief="raised")
         self.summary_button.pack(pady=10)
 
         # Pie de página
@@ -91,30 +95,30 @@ class CombosSelectionView(Frame):
         customization_window = Toplevel(self.master)
         customization_window.title("Personalizar Combo")
         customization_window.geometry("400x400")
-        customization_window.configure(bg="#000000")
+        customization_window.configure(bg="#ffffff")
 
-        Label(customization_window, text="Personalizar Combo", font=("Helvetica", 18, "bold"), bg="#000000", fg="white").pack(pady=10)
+        Label(customization_window, text="Personalizar Combo", font=("Helvetica", 18, "bold"), bg="#ffffff", fg="black").pack(pady=10)
 
         # Opciones de palomitas
-        Label(customization_window, text="Palomitas:", font=("Helvetica", 14), bg="#000000", fg="white").pack(pady=5)
+        Label(customization_window, text="Palomitas:", font=("Helvetica", 14), bg="#ffffff", fg="black").pack(pady=5)
         self.popcorn_size = IntVar()
         self.popcorn_size.trace("w", self.calculate_total_price)  # Actualizar precio en tiempo real
-        Radiobutton(customization_window, text="Pequeñas (+$1)", variable=self.popcorn_size, value=1, bg="#000000", fg="white", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
-        Radiobutton(customization_window, text="Normales (+$2)", variable=self.popcorn_size, value=2, bg="#000000", fg="white", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
-        Radiobutton(customization_window, text="Grandes (+$3)", variable=self.popcorn_size, value=3, bg="#000000", fg="white", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
+        Radiobutton(customization_window, text="Pequeñas (+$1)", variable=self.popcorn_size, value=1, bg="#ffffff", fg="black", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
+        Radiobutton(customization_window, text="Normales (+$2)", variable=self.popcorn_size, value=2, bg="#ffffff", fg="black", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
+        Radiobutton(customization_window, text="Grandes (+$3)", variable=self.popcorn_size, value=3, bg="#ffffff", fg="black", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
 
         # Opciones de bebidas
-        Label(customization_window, text="Bebidas:", font=("Helvetica", 14), bg="#000000", fg="white").pack(pady=5)
+        Label(customization_window, text="Bebidas:", font=("Helvetica", 14), bg="#ffffff", fg="black").pack(pady=5)
         self.drink_size = IntVar()
         self.drink_size.trace("w", self.calculate_total_price)  # Actualizar precio en tiempo real
-        Radiobutton(customization_window, text="Pequeñas (+$1)", variable=self.drink_size, value=1, bg="#000000", fg="white", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
-        Radiobutton(customization_window, text="Normales (+$2)", variable=self.drink_size, value=2, bg="#000000", fg="white", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
-        Radiobutton(customization_window, text="Grandes (+$3)", variable=self.drink_size, value=3, bg="#000000", fg="white", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
+        Radiobutton(customization_window, text="Pequeñas (+$1)", variable=self.drink_size, value=1, bg="#ffffff", fg="black", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
+        Radiobutton(customization_window, text="Normales (+$2)", variable=self.drink_size, value=2, bg="#ffffff", fg="black", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
+        Radiobutton(customization_window, text="Grandes (+$3)", variable=self.drink_size, value=3, bg="#ffffff", fg="black", selectcolor="#1a1a1a", font=("Helvetica", 12)).pack(anchor="w")
 
-        self.custom_total_price_label = Label(customization_window, text=f"Precio total estimado: ${self.total_price:.2f}", font=("Helvetica", 16, "bold"), bg="#000000", fg="white")
+        self.custom_total_price_label = Label(customization_window, text=f"Precio total estimado: ${self.total_price:.2f}", font=("Helvetica", 16, "bold"), bg="#ffffff", fg="black")
         self.custom_total_price_label.pack(pady=10)
 
-        Button(customization_window, text="Calcular Precio Total", command=self.open_promotions_view, font=("Helvetica", 14, "bold"), bg="#1a1a1a", fg="white", bd=2, relief="raised").pack(pady=20)
+        Button(customization_window, text="Calcular Precio Total", command=self.open_promotions_view, font=("Helvetica", 14, "bold"), bg="#333333", fg="white", bd=2, relief="raised").pack(pady=20)
 
     # Método para calcular el precio total con personalización
     def calculate_total_price(self, *args):
@@ -145,5 +149,4 @@ class CombosSelectionView(Frame):
 
     def run(self):
         self.pack()
-        
         self.master.mainloop()

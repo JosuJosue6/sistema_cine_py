@@ -1,4 +1,4 @@
-from tkinter import Frame, Label, Listbox, Button, Scrollbar, messagebox, Toplevel
+from tkinter import Frame, Label, Listbox, Button, messagebox, Toplevel
 from controllers.promotion_controller import PromotionController
 from views.summary_view import SummaryView  # Asegúrate de importar la clase SummaryView
 from decimal import Decimal
@@ -25,18 +25,18 @@ class PromotionsView(Frame):
     def create_widgets(self):
         # Maximizar la ventana
         self.master.state('zoomed')
-        self.master.configure(bg="white")  # Fondo oscuro
+        self.master.configure(bg="white")  # Fondo blanco
 
         # Barra de navegación
-        self.navbar = Frame(self.master, bg="#333333", height=100)  # Fondo rojo
+        self.navbar = Frame(self.master, bg="#333333", height=100)  # Fondo gris oscuro
         self.navbar.pack(side="top", fill="x")
 
         self.navbar_label = Label(self.navbar, text="Sistema de CINE", font=("Helvetica", 24, "bold"), bg="#333333", fg="white", padx=10)
         self.navbar_label.pack(side="left", padx=(10, 400), pady=10)
 
         # Cargar la imagen para la navbar
-        if os.path.exists("src/assets/movies/movie1.jpg"):  # Reemplaza con la ruta de tu imagen
-            navbar_image = Image.open("src/assets/movies/movie1.jpg")
+        if os.path.exists("src/assets/image/image.jpg"):  # Reemplaza con la ruta de tu imagen
+            navbar_image = Image.open("src/assets/image/image.jpg")
             navbar_image = navbar_image.resize((60, 60), Image.LANCZOS)  # Usar Image.LANCZOS en lugar de Image.ANTIALIAS
             
             # Crear una máscara circular
@@ -51,18 +51,17 @@ class PromotionsView(Frame):
             self.navbar_image_label.image = navbar_photo  # Guardar una referencia para evitar que la imagen sea recolectada por el garbage collector
             self.navbar_image_label.pack(side="right", padx=10, pady=10)
 
-        self.title_label = Label(self, text="Promociones Vigentes", font=("Helvetica", 18, "bold"), bg="white", fg="black")
+        # Contenedor central con borde negro
+        self.container = Frame(self.master, bg="#ffffff", bd=2, relief="solid", highlightbackground="black", highlightthickness=2)
+        self.container.place(relx=0.5, rely=0.5, anchor="center", width=600, height=600)
+
+        self.title_label = Label(self.container, text="Promociones Vigentes", font=("Helvetica", 18, "bold"), bg="white", fg="black")
         self.title_label.pack(pady=10)
 
-        self.promotion_list = Listbox(self, width=50, font=("Helvetica", 14), bg="#ecf0f1", fg="#2c3e50", bd=2, relief="groove")
+        self.promotion_list = Listbox(self.container, width=50, font=("Helvetica", 14), bg="#ecf0f1", fg="#2c3e50", bd=2, relief="groove")
         self.promotion_list.pack(pady=10)
 
-        self.scrollbar = Scrollbar(self)
-        self.scrollbar.pack(side="right", fill="y")
-        self.promotion_list.config(yscrollcommand=self.scrollbar.set)
-        self.scrollbar.config(command=self.promotion_list.yview)
-
-        self.select_button = Button(self, text="Seleccionar Promoción", command=self.select_promotion, font=("Helvetica", 14, "bold"), bg="#333333", fg="white", bd=2, relief="raised")
+        self.select_button = Button(self.container, text="Seleccionar Promoción", command=self.select_promotion, font=("Helvetica", 14, "bold"), bg="#333333", fg="white", bd=2, relief="raised")
         self.select_button.pack(pady=10)
 
         # Pie de página

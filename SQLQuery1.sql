@@ -91,11 +91,6 @@ VALUES
 ('A', 'C', 7, 1),
 ('A', 'C', 8, 1),
 ('A', 'C', 9, 1),
-('A', 'C', 10, 1),
-('A', 'C', 11, 1),
-('A', 'C', 12, 1),
-('A', 'C', 13, 1),
-('A', 'C', 14, 1),
 ('A', 'D', 1, 1),
 ('A', 'D', 2, 1),
 ('A', 'D', 3, 1),
@@ -105,11 +100,8 @@ VALUES
 ('A', 'D', 7, 1),
 ('A', 'D', 8, 1),
 ('A', 'D', 9, 1),
-('A', 'D', 10, 1),
-('A', 'D', 11, 1),
-('A', 'D', 12, 1),
-('A', 'D', 13, 1),
-('A', 'D', 14, 1);
+('A', 'D', 10, 1)
+
 
 INSERT INTO Tickets (Type, Price, Promotion)
 VALUES 
@@ -126,4 +118,7 @@ VALUES
 
 INSERT INTO Users (Name, Email, PurchaseHistory, Password)
 VALUES 
-('John Doe', 'john@example.com', 'None');
+('Josu', 'josuensd@gmail.com', 'None', "123456"),
+('Elizeth', 'elizethparra@hotmail.com', 'None', "123456");
+
+

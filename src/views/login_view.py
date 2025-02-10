@@ -28,8 +28,8 @@ class LoginView(Frame):
         self.inner_frame.place(relx=0.5, rely=0.5, anchor="center", width=380, height=480)
 
         # Espacio para la imagen redondeada
-        if os.path.exists("src/assets/movies/movie1.jpg"):  # Reemplaza con la ruta de tu imagen
-            avatar_image = Image.open("src/assets/movies/movie1.jpg")
+        if os.path.exists("src/assets/image/image.jpg"):  # Reemplaza con la ruta de tu imagen
+            avatar_image = Image.open("src/assets/image/image.jpg")
             avatar_image = avatar_image.resize((100, 100), Image.LANCZOS)
 
             # Crear una máscara circular

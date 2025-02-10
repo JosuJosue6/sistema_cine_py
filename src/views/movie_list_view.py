@@ -5,7 +5,7 @@ import os
 from views.ticket_selection_view import TicketSelectionView
 
 class MovieListView(Frame):
-    def __init__(self, master=None, db_connection=None, email =None):
+    def __init__(self, master, db_connection, email):
         super().__init__(master)
         self.master = master
         self.email = email
@@ -33,8 +33,8 @@ class MovieListView(Frame):
         self.navbar_label.pack(side="left", padx=(10, 200), pady=10)  # Mover más a la izquierda
 
         # Cargar la imagen para la navbar
-        if os.path.exists("src/assets/movies/movie1.jpg"):  
-            navbar_image = Image.open("src/assets/movies/movie1.jpg")
+        if os.path.exists("src/assets/image/image.jpg"):  
+            navbar_image = Image.open("src/assets/image/image.jpg")
             navbar_image = navbar_image.resize((60, 60), Image.LANCZOS) 
 
             # Crear una máscara circular
@@ -237,8 +237,8 @@ class MovieListView(Frame):
         navbar_label.pack(side="left", padx=(10, 400), pady=10)
 
         # Cargar la imagen para la navbar
-        if os.path.exists("src/assets/movies/movie1.jpg"):  # Reemplaza con la ruta de tu imagen
-            navbar_image = Image.open("src/assets/movies/movie1.jpg")
+        if os.path.exists("src/assets/image/image.jpg"):  # Reemplaza con la ruta de tu imagen
+            navbar_image = Image.open("src/assets/image/image.jpg")
             navbar_image = navbar_image.resize((50, 50), Image.LANCZOS)  # Usar Image.LANCZOS en lugar de Image.ANTIALIAS
 
             # Crear una máscara circular
@@ -255,7 +255,7 @@ class MovieListView(Frame):
 
         # Frame para contener la imagen y los detalles
         content_frame = Frame(popup, bd=2, highlightbackground="black", highlightthickness=2, width=500, height=500)
-        content_frame.place(relx=0.5, rely=0.5, anchor="center", width=1000, height=480)
+        content_frame.pack(pady=10, padx=20, fill="both", expand=True)
 
         # Verificar si la imagen existe
         if os.path.exists(movie.image):
@@ -281,7 +281,7 @@ class MovieListView(Frame):
 
         # Frame para contener los botones
         button_frame = Frame(popup)
-        button_frame.pack(pady=300)  # Asegurar que el frame de botones esté en la parte inferior
+        button_frame.pack(pady=10)  # Asegurar que el frame de botones esté en la parte inferior
 
         # Botón para cerrar la ventana emergente
         close_button = Button(button_frame, text="Regresar", command=popup.destroy, font=("Helvetica", 14, "bold"), bg="#1a1a1a", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
@@ -302,7 +302,18 @@ class MovieListView(Frame):
 
     # Método para abrir la ventana de selección de boletos
     def open_ticket_selection(self, movie):
+        
         self.master.destroy()  # Cerrar la ventana de MovieListView
+        purchase_info = {
+            'movie': movie,
+            'ticket_count': 0,
+            'seats': [],
+            'combos': [],
+            'promotions': [],
+            'total': 0.0,
+            'payment_method': '',
+            'email': self.user_email
+        }
         ticket_selection_window = Tk()
         ticket_selection_view = TicketSelectionView(ticket_selection_window, self.movie_controller.db_connection, movie,self.email)
         ticket_selection_view.pack(fill="both", expand=True)

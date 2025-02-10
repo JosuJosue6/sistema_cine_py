@@ -6,7 +6,7 @@ from PIL import Image, ImageTk, ImageDraw  # Necesitarás instalar Pillow para m
 import os
 
 class SeatSelectionView(Frame):
-    def __init__(self, master, movie, db_connection, ticket_count, subtotal, payment_method,email):
+    def __init__(self, master, movie, db_connection, ticket_count, subtotal, payment_method, email):
         super().__init__(master)
         self.master = master
         self.movie = movie
@@ -32,8 +32,8 @@ class SeatSelectionView(Frame):
         self.navbar_label.pack(side="left", padx=(10, 400), pady=10)
 
         # Cargar la imagen para la navbar
-        if os.path.exists("src/assets/movies/movie1.jpg"):  
-            navbar_image = Image.open("src/assets/movies/movie1.jpg")
+        if os.path.exists("src/assets/image/image.jpg"):  
+            navbar_image = Image.open("src/assets/image/image.jpg")
             navbar_image = navbar_image.resize((60, 60), Image.LANCZOS) 
 
             # Crear una máscara circular
@@ -51,8 +51,8 @@ class SeatSelectionView(Frame):
         self.title_label = Label(self, text=f"Selecciona tus asientos para: {self.movie.title}", font=("Arial", 18, "bold"), bg="#f0f0f0", fg="#333")
         self.title_label.pack(pady=10)
 
-        self.seat_frame = Frame(self, bg="#f0f0f0")
-        self.seat_frame.pack(pady=10)
+        self.seat_frame = Frame(self, bg="#f0f0f0", bd=2, relief="solid")
+        self.seat_frame.pack(pady=10, padx=10, fill="both", expand=True)
 
         self.seat_buttons = self.create_seat_buttons()
 
@@ -72,7 +72,7 @@ class SeatSelectionView(Frame):
         buttons = []
         row_mapping = {chr(i): i - 65 for i in range(65, 91)}  # Mapea 'A' a 0, 'B' a 1, etc.
         for seat in seats:
-            print(seat)
+            #print(seat)
             row = row_mapping.get(seat.row, seat.row)  # Mapea la fila a un entero
             button_image = self.create_rounded_button_image("green" if seat.is_available() else "red")
             button = Button(self.seat_frame, image=button_image, text=f"{seat.row}{seat.number}", compound="center", fg="white",
@@ -114,6 +114,10 @@ class SeatSelectionView(Frame):
         if len(self.selected_seats) != self.ticket_count:
             messagebox.showwarning("Advertencia", f"Debes seleccionar exactamente {self.ticket_count} asientos.")
             return
+
+        # Actualizar el estado de los asientos seleccionados en la base de datos
+        for seat in self.selected_seats:
+            self.seat_controller.reserve_seat(seat.room, seat.row, seat.number)
 
         # Validar la selección de asientos
         messagebox.showinfo("Confirmación", f"Asientos seleccionados: {', '.join([f'{s.row}{s.number}' for s in self.selected_seats])}")

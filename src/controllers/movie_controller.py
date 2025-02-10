@@ -9,9 +9,9 @@ class MovieController:
     # buscar todas las películas
     def fetch_movies(self):
         query = "SELECT * FROM Movies"
-        print(self.db_connection.server)
+        #print(self.db_connection.server)
         result = self.db_connection.execute_query(query)
-        print(result)
+       # print(result)
         if result:
             return [Movie(*row) for row in result]
         return []
