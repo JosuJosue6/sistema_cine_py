@@ -14,6 +14,8 @@ class TicketSelectionView(Frame):
         self.ticket_controller = TicketController(db_connection)
         self.ticket_type_vars = []
         self.ticket_count = None
+        self.subtotal = 0  # Variable para almacenar el subtotal
+        self.payment_method = StringVar()  # Variable para almacenar el método de pago
         self.init_ui()
 
     # Método para inicializar la interfaz
@@ -48,30 +50,33 @@ class TicketSelectionView(Frame):
             self.navbar_image_label.pack(side="right", padx=10, pady=10)
 
         self.ticket_count_var = IntVar()
-        self.payment_method = StringVar()
 
-        Label(self, text=f"Seleccionar boletos para: {self.movie.title}", font=("Arial", 14), bg="#ffffff", fg="black").pack(pady=10)
-        Label(self, text=f"Género: {self.movie.genre}", font=("Arial", 12), bg="#ffffff", fg="black").pack(pady=5)
-        Label(self, text=f"Clasificación: {self.movie.classification}", font=("Arial", 12), bg="#ffffff", fg="black").pack(pady=5)
-        Label(self, text=f"Duración: {self.movie.duration} min", font=("Arial", 12), bg="#ffffff", fg="black").pack(pady=5)
+        # Contenedor central con borde negro
+        self.container = Frame(self, bg="#ffffff", bd=2, relief="solid", highlightbackground="black", highlightthickness=2)
+        self.container.place(relx=0.5, rely=0.5, anchor="center", width=600, height=600)
 
-        Label(self, text="Ingrese el número de boletos:", bg="#ffffff", fg="black").pack(pady=5)
+        Label(self.container, text=f"Seleccionar boletos para: {self.movie.title}", font=("Arial", 14), bg="#ffffff", fg="black").pack(pady=10)
+        Label(self.container, text=f"Género: {self.movie.genre}", font=("Arial", 12), bg="#ffffff", fg="black").pack(pady=5)
+        Label(self.container, text=f"Clasificación: {self.movie.classification}", font=("Arial", 12), bg="#ffffff", fg="black").pack(pady=5)
+        Label(self.container, text=f"Duración: {self.movie.duration} min", font=("Arial", 12), bg="#ffffff", fg="black").pack(pady=5)
+
+        Label(self.container, text="Ingrese el número de boletos:", bg="#ffffff", fg="black").pack(pady=5)
         ticket_count_options = list(range(1, 11))  # Opciones de 1 a 10 boletos
-        OptionMenu(self, self.ticket_count_var, *ticket_count_options).pack(pady=5)
+        OptionMenu(self.container, self.ticket_count_var, *ticket_count_options).pack(pady=5)
 
-        Button(self, text="Confirmar número de boletos", command=self.confirm_ticket_count, font=("Arial", 12, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2).pack(pady=10)
+        Button(self.container, text="Confirmar número de boletos", command=self.confirm_ticket_count, font=("Arial", 12, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2).pack(pady=10)
 
-        self.ticket_type_frame = Frame(self, bg="#ffffff")
+        self.ticket_type_frame = Frame(self.container, bg="#ffffff")
         self.ticket_type_frame.pack(pady=10)
 
-        Label(self, text="Seleccione el método de pago:", bg="#ffffff", fg="black").pack(pady=5)
+        Label(self.container, text="Seleccione el método de pago:", bg="#ffffff", fg="black").pack(pady=5)
         payment_options = ["Tarjeta", "Contado"]
-        OptionMenu(self, self.payment_method, *payment_options).pack()
+        OptionMenu(self.container, self.payment_method, *payment_options).pack()
 
-        self.subtotal_label = Label(self, text="Subtotal: N/A", bg="#ffffff", fg="black")
+        self.subtotal_label = Label(self.container, text="Subtotal: N/A", bg="#ffffff", fg="black")
         self.subtotal_label.pack(pady=10)
 
-        Button(self, text="Confirmar selección", command=self.confirm_selection, font=("Arial", 12, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2).pack(pady=10)
+        Button(self.container, text="Confirmar selección", command=self.confirm_selection, font=("Arial", 12, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2).pack(pady=10)
 
         # Pie de página
         self.footer = Frame(self.master, bg="#333333", height=50)
@@ -121,12 +126,12 @@ class TicketSelectionView(Frame):
         self.update_subtotal()
 
     def update_subtotal(self):
-        subtotal = 0
+        self.subtotal = 0  # Reiniciar el subtotal
         for var in self.ticket_type_vars:
             ticket_type = var.get()
             price = next((item['price'] for item in self.ticket_prices if item['type'] == ticket_type), 0)
-            subtotal += price
-        self.subtotal_label.config(text=f"Subtotal: {subtotal}")
+            self.subtotal += price
+        self.subtotal_label.config(text=f"Subtotal: {self.subtotal}")
 
     # Método para confirmar la selección del boleto
     def confirm_selection(self):
@@ -138,16 +143,18 @@ class TicketSelectionView(Frame):
             return
 
         # Aquí se puede agregar la lógica para calcular el precio y aplicar promociones
-        messagebox.showinfo("Confirmación", f"Boletos: {', '.join(ticket_types)}\nMétodo de pago: {payment}\nPelícula: {self.movie.title}")
+        messagebox.showinfo("Confirmación", f"Boletos: {', '.join(ticket_types)}\nMétodo de pago: {payment}\nPelícula: {self.movie.title}\nSubtotal: {self.subtotal}")
 
         # Abrir la vista de selección de asientos
         self.open_seat_selection()
 
     # Método para abrir la vista de selección de asientos
     def open_seat_selection(self):
+        self.master.withdraw()  # Ocultar la ventana de TicketSelectionView
         seat_selection_window = Toplevel(self.master)
-        seat_selection_view = SeatSelectionView(seat_selection_window, self.movie, self.db_connection, self.ticket_count)
+        seat_selection_view = SeatSelectionView(seat_selection_window, self.movie, self.db_connection, self.ticket_count, self.subtotal, self.payment_method.get())
         seat_selection_view.pack()
+        seat_selection_window.protocol("WM_DELETE_WINDOW", self.master.destroy)  # Destruir la ventana principal cuando se cierre la nueva ventana
 
     def run(self):
         self.pack()

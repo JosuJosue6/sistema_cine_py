@@ -6,13 +6,15 @@ from PIL import Image, ImageTk, ImageDraw  # Necesitarás instalar Pillow para m
 import os
 
 class SeatSelectionView(Frame):
-    def __init__(self, master, movie, db_connection, ticket_count):
+    def __init__(self, master, movie, db_connection, ticket_count, subtotal, payment_method):
         super().__init__(master)
         self.master = master
         self.movie = movie
         self.db_connection = db_connection
         self.seat_controller = SeatController(db_connection)
         self.ticket_count = ticket_count
+        self.subtotal = subtotal  # Subtotal de los boletos
+        self.payment_method = payment_method  # Método de pago
         self.selected_seats = []
         self.init_ui()
 
@@ -25,13 +27,20 @@ class SeatSelectionView(Frame):
         self.navbar = Frame(self.master, bg="#333", height=70)  # Fondo oscuro
         self.navbar.pack(side="top", fill="x")
 
-        self.navbar_label = Label(self.navbar, text="Sistema de CINE", font=("Arial", 24, "bold"), bg="#333", fg="white", padx=10)
+        self.navbar_label = Label(self.navbar, text="Sistema de CINE", font=("Arial", 30, "bold"), bg="#333", fg="white", padx=10)
         self.navbar_label.pack(side="left", padx=(10, 400), pady=10)
 
         # Cargar la imagen para la navbar
-        if os.path.exists("src/assets/Screenshot 2024-07-14 232103.png"):  # Reemplaza con la ruta de tu imagen
-            navbar_image = Image.open("src/assets/Screenshot 2024-07-14 232103.png")
-            navbar_image = navbar_image.resize((50, 50), Image.LANCZOS)  # Usar Image.LANCZOS en lugar de Image.ANTIALIAS
+        if os.path.exists("src/assets/movies/movie1.jpg"):  
+            navbar_image = Image.open("src/assets/movies/movie1.jpg")
+            navbar_image = navbar_image.resize((60, 60), Image.LANCZOS) 
+
+            # Crear una máscara circular
+            mask = Image.new("L", navbar_image.size, 0)
+            draw = ImageDraw.Draw(mask)
+            draw.ellipse((0, 0) + navbar_image.size, fill=255)
+            navbar_image.putalpha(mask)
+
             navbar_photo = ImageTk.PhotoImage(navbar_image)
 
             self.navbar_image_label = Label(self.navbar, image=navbar_photo, bg="#333")
@@ -46,7 +55,7 @@ class SeatSelectionView(Frame):
 
         self.seat_buttons = self.create_seat_buttons()
 
-        self.confirm_button = Button(self, text="Confirmar selección", command=self.confirm_selection, bg="#4CAF50", fg="white", font=("Arial", 12, "bold"))
+        self.confirm_button = Button(self, text="Confirmar selección", command=self.confirm_selection, bg="#000000", fg="white", font=("Arial", 12, "bold"))
         self.confirm_button.pack(pady=10)
 
         # Pie de página
@@ -113,9 +122,11 @@ class SeatSelectionView(Frame):
 
     # Método para abrir la vista de selección de combos
     def open_combos_selection(self):
+        self.master.withdraw()  # Ocultar la ventana de SeatSelectionView
         combos_selection_window = Toplevel(self.master)
-        combos_selection_view = CombosSelectionView(combos_selection_window, self.movie, self.selected_seats, self.db_connection)
+        combos_selection_view = CombosSelectionView(combos_selection_window, self.movie, self.selected_seats, self.db_connection, self.subtotal, self.payment_method)
         combos_selection_view.pack()
+        combos_selection_window.protocol("WM_DELETE_WINDOW", lambda: (self.master.deiconify(), combos_selection_window.destroy()))  # Mostrar la ventana principal cuando se cierre la nueva ventana
 
     def run(self):
         self.pack()

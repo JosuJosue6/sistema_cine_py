@@ -122,7 +122,7 @@ VALUES
 ('Combo 1: Palomitas y soda', 8.00),
 ('Combo 2: palomitas grandes y soda', 10.00),
 ('Combo 3: palomitas y soda grande', 10.00),
-('Combo 2: palomitas grandes y soda grande', 12.00);
+('Combo 4: palomitas grandes y soda grande', 12.00);
 
 INSERT INTO Users (Name, Email, PurchaseHistory)
 VALUES 

@@ -1,16 +1,18 @@
 from tkinter import Frame, Label, Button, Listbox, StringVar, Entry, messagebox, Toplevel, Radiobutton, IntVar
 from views.promotions_view import PromotionsView  # Asegúrate de importar la clase PromotionsView
-from PIL import Image, ImageTk  # Necesitarás instalar Pillow para manejar imágenes
+from PIL import Image, ImageTk, ImageDraw  # Necesitarás instalar Pillow para manejar imágenes
 import os
 from controllers.combo_controller import ComboController
 
 class CombosSelectionView(Frame):
-    def __init__(self, master, movie, selected_seats, db_connection):
+    def __init__(self, master, movie, selected_seats, db_connection, subtotal, payment_method):
         super().__init__(master)
         self.master = master
         self.movie = movie
         self.selected_seats = selected_seats
         self.db_connection = db_connection
+        self.subtotal = subtotal  # Subtotal de los boletos
+        self.payment_method = payment_method  # Método de pago
         self.combo_controller = ComboController(db_connection)
         self.combos = self.load_combos()
         self.selected_combos = []
@@ -25,16 +27,23 @@ class CombosSelectionView(Frame):
         self.master.configure(bg="#000000")  # Fondo negro
 
         # Barra de navegación
-        self.navbar = Frame(self.master, bg="#333333", height=70)  # Fondo gris oscuro
+        self.navbar = Frame(self.master, bg="#333333", height=100)  # Fondo gris oscuro
         self.navbar.pack(side="top", fill="x")
 
-        self.navbar_label = Label(self.navbar, text="Sistema de CINE", font=("Helvetica", 24, "bold"), bg="#333333", fg="white", padx=10)
-        self.navbar_label.pack(side="left", padx=(10, 400), pady=10)
+        self.navbar_label = Label(self.navbar, text="Sistema de CINE", font=("Helvetica", 30, "bold"), bg="#333333", fg="white", padx=10)
+        self.navbar_label.pack(side="left", padx=(10, 200), pady=10)
 
         # Cargar la imagen para la navbar
-        if os.path.exists("src/assets/Screenshot 2024-07-14 232103.png"):  # Reemplaza con la ruta de tu imagen
-            navbar_image = Image.open("src/assets/Screenshot 2024-07-14 232103.png")
-            navbar_image = navbar_image.resize((50, 50), Image.LANCZOS)  # Usar Image.LANCZOS en lugar de Image.ANTIALIAS
+        if os.path.exists("src/assets/movies/movie1.jpg"):  # Reemplaza con la ruta de tu imagen
+            navbar_image = Image.open("src/assets/movies/movie1.jpg")
+            navbar_image = navbar_image.resize((60, 60), Image.LANCZOS)  # Usar Image.LANCZOS en lugar de Image.ANTIALIAS
+            
+            # Crear una máscara circular
+            mask = Image.new("L", navbar_image.size, 0)
+            draw = ImageDraw.Draw(mask)
+            draw.ellipse((0, 0) + navbar_image.size, fill=255)
+            navbar_image.putalpha(mask)
+
             navbar_photo = ImageTk.PhotoImage(navbar_image)
 
             self.navbar_image_label = Label(self.navbar, image=navbar_photo, bg="#333333")
@@ -73,7 +82,7 @@ class CombosSelectionView(Frame):
     # Método para actualizar el precio total
     def update_total_price(self, event=None):
         selected_indices = self.combo_listbox.curselection()
-        self.total_price = sum(self.combos[i].price for i in selected_indices)
+        self.total_price = self.subtotal + sum(self.combos[i].price for i in selected_indices)
         self.total_price_label.config(text=f"Precio total estimado: ${self.total_price:.2f}")
 
     # Método para mostrar la ventana de personalización
@@ -119,6 +128,7 @@ class CombosSelectionView(Frame):
 
     # Método para abrir la vista de promociones
     def open_promotions_view(self):
+        self.master.withdraw()  # Ocultar la ventana de CombosSelectionView
         purchase_summary = {
             'movie': self.movie.title,
             'ticket_count': len(self.selected_seats),
@@ -128,8 +138,9 @@ class CombosSelectionView(Frame):
             'total': self.total_price
         }
         promotions_window = Toplevel(self.master)
-        promotions_view = PromotionsView(promotions_window, purchase_summary,self.db_connection)
+        promotions_view = PromotionsView(promotions_window, purchase_summary, self.db_connection)
         promotions_view.pack()
+        promotions_window.protocol("WM_DELETE_WINDOW", lambda: (self.master.deiconify(), promotions_window.destroy()))  # Mostrar la ventana principal cuando se cierre la nueva ventana
 
     def run(self):
         self.pack()

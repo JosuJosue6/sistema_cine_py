@@ -4,3 +4,4 @@ Pillow #libreria para manejo de imagenes
 qrcode #libreria para generar codigos qr
 smtplib #libreria para enviar correos
 email-validator #libreria para validar correos
+reportlab

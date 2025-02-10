@@ -1,6 +1,6 @@
 from tkinter import Tk
 from database.db_connection import DatabaseConnection
-from views.movie_list_view import MovieListView
+from views.login_view import LoginView
 
 def main():
     root = Tk()
@@ -17,9 +17,9 @@ def main():
     db_connection.connect()
     
     # Crear la vista de la lista de películas y pasar la conexión de la base de datos
-    movie_list_view = MovieListView(root, db_connection)
+    login_view = LoginView(root, db_connection)
     # Empaquetar la vista
-    movie_list_view.pack(fill="both", expand=True)
+    login_view.pack(fill="both", expand=True)
 
     root.mainloop()
 

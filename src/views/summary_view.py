@@ -6,21 +6,25 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 import os
-from controllers.user_controller import UserController  # Asegúrate de tener un controlador de usuario para obtener el correo electrónico del usuario
-from PIL import Image, ImageTk, ImageDraw  # Necesitarás instalar Pillow para manejar imágenes
+from controllers.user_controller import UserController  
+from PIL import Image, ImageTk, ImageDraw  
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 class SummaryView(Frame):
-    def __init__(self, master, purchase_summary, db_connection):
+    def __init__(self, master, purchase_summary, db_connection, user_email):
         super().__init__(master)
         self.master = master
         self.purchase_summary = purchase_summary
         self.db_connection = db_connection
+        self.user_email = user_email
         self.user_controller = UserController(db_connection)
         self.init_ui()
 
     def init_ui(self):
         self.master.title("Resumen de Compra")
         self.master.configure(bg="#ffffff")  # Fondo blanco
+        self.master.state('zoomed')
 
         # Barra de navegación
         self.navbar = Frame(self.master, bg="#333333", height=70)  # Fondo gris oscuro
@@ -81,19 +85,46 @@ class SummaryView(Frame):
         qr_path = "purchase_qr.png"
         qr.save(qr_path)
 
-        # Obtener el correo electrónico del usuario desde la base de datos
-        user_email = self.user_controller.get_user_email(2)
-        if not user_email:
-            messagebox.showerror("Error", "No se pudo obtener el correo electrónico del usuario.")
-            return
+        # Generar el PDF con la información del resumen y el código QR
+        pdf_path = "purchase_summary.pdf"
+        self.generate_pdf(pdf_path, qr_path)
 
-        # Enviar el correo electrónico con el código QR adjunto
-        self.send_email(user_email, qr_path)
+        # Enviar el correo electrónico con el PDF adjunto
+        self.send_email(self.user_email, pdf_path)
 
-        messagebox.showinfo("Confirmación", "Compra confirmada y correo enviado con el código QR.")
+        messagebox.showinfo("Confirmación", "Compra confirmada y correo enviado con el PDF de la factura.")
 
-    def send_email(self, to_email, qr_path):
-        from_email = "tu_correo@gmail.com"
+    def generate_pdf(self, pdf_path, qr_path):
+        c = canvas.Canvas(pdf_path, pagesize=letter)
+        width, height = letter
+
+        # Título
+        c.setFont("Times-Bold", 24)
+        c.drawString(100, height - 100, "Factura de Compra")
+
+        # Detalles de la compra
+        c.setFont("Times-Roman", 14)
+        c.drawString(100, height - 150, f"Película: {self.purchase_summary['movie']}")
+        c.drawString(100, height - 170, f"Asientos: {', '.join(self.purchase_summary['seats'])}")
+        c.drawString(100, height - 190, f"Combos: {', '.join(self.purchase_summary['combos'])}")
+        c.drawString(100, height - 210, f"Promociones aplicadas: {', '.join(self.purchase_summary['promotions'])}")
+        c.drawString(100, height - 230, f"Total a pagar: ${self.purchase_summary['total']:.2f}")
+
+        # Código QR
+        c.drawImage(qr_path, 100, height - 400, width=200, height=200)
+
+        # Información adicional de la factura
+        c.setFont("Times-Bold", 16)
+        c.drawString(100, height - 450, "Información de Contacto")
+        c.setFont("Times-Roman", 14)
+        c.drawString(100, height - 470, f"Nombre del Cliente: {self.user_email.split('@')[0].replace('.', ' ').title()}")
+        c.drawString(100, height - 490, f"Correo Electrónico: {self.user_email}")
+        c.drawString(100, height - 510, "Fecha de Compra: 08/02/2025")
+
+        c.save()
+
+    def send_email(self, to_email, pdf_path):
+        from_email = "testpruebasvsc@gmail.com"
         from_password = "tu_contraseña"
         subject = "Confirmación de Compra - Sistema de Cine"
 
@@ -102,14 +133,14 @@ class SummaryView(Frame):
         msg['To'] = to_email
         msg['Subject'] = subject
 
-        body = "Gracias por tu compra. Adjuntamos el código QR con los detalles de tu compra."
+        body = "Gracias por tu compra. Adjuntamos el PDF con los detalles de tu compra y el código QR."
         msg.attach(MIMEText(body, 'plain'))
 
-        attachment = open(qr_path, "rb")
+        attachment = open(pdf_path, "rb")
         part = MIMEBase('application', 'octet-stream')
         part.set_payload(attachment.read())
         encoders.encode_base64(part)
-        part.add_header('Content-Disposition', f"attachment; filename= {os.path.basename(qr_path)}")
+        part.add_header('Content-Disposition', f"attachment; filename= {os.path.basename(pdf_path)}")
         msg.attach(part)
 
         server = smtplib.SMTP('smtp.gmail.com', 587)

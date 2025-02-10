@@ -1,4 +1,4 @@
-from tkinter import LEFT, RIGHT, Frame, Label, Scrollbar, StringVar, Entry, Button, END, messagebox, Toplevel, HORIZONTAL, Canvas, OptionMenu, ttk
+from tkinter import Tk, LEFT, RIGHT, Frame, Label, Scrollbar, StringVar, Entry, Button, END, messagebox, Toplevel, HORIZONTAL, Canvas, OptionMenu, ttk
 from PIL import Image, ImageTk, ImageDraw  # Necesitarás instalar Pillow para manejar imágenes
 from controllers.movie_controller import MovieController
 import os
@@ -227,7 +227,7 @@ class MovieListView(Frame):
         popup.title(movie.title)
 
         # Maximizar la ventana
-        self.master.state('zoomed')
+        popup.state('zoomed')
 
         # Barra de navegación para la ventana emergente
         navbar = Frame(popup, bg="#333333", height=70)  # Fondo gris oscuro
@@ -254,7 +254,7 @@ class MovieListView(Frame):
 
         # Frame para contener la imagen y los detalles
         content_frame = Frame(popup, bd=2, highlightbackground="black", highlightthickness=2, width=500, height=500)
-        content_frame.pack(pady=10, padx=10, fill="both", expand=True)
+        content_frame.place(relx=0.5, rely=0.5, anchor="center", width=1000, height=480)
 
         # Verificar si la imagen existe
         if os.path.exists(movie.image):
@@ -280,7 +280,7 @@ class MovieListView(Frame):
 
         # Frame para contener los botones
         button_frame = Frame(popup)
-        button_frame.pack(pady=10)
+        button_frame.pack(pady=500)  # Asegurar que el frame de botones esté en la parte inferior
 
         # Botón para cerrar la ventana emergente
         close_button = Button(button_frame, text="Regresar", command=popup.destroy, font=("Helvetica", 14, "bold"), bg="#1a1a1a", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
@@ -301,6 +301,8 @@ class MovieListView(Frame):
 
     # Método para abrir la ventana de selección de boletos
     def open_ticket_selection(self, movie):
-        ticket_selection_window = Toplevel(self)
+        self.master.destroy()  # Cerrar la ventana de MovieListView
+        ticket_selection_window = Tk()
         ticket_selection_view = TicketSelectionView(ticket_selection_window, self.movie_controller.db_connection, movie)
-        ticket_selection_view.pack()
+        ticket_selection_view.pack(fill="both", expand=True)
+        ticket_selection_window.mainloop()
