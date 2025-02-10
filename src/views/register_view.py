@@ -60,7 +60,7 @@ class RegisterUserView(Frame):
     def clear_entries(self):
         self.name_entry.delete(0, 'end')
         self.email_entry.delete(0, 'end')
-        self.phone_entry.delete(0, 'end')
+        
         self.password_entry.delete(0, 'end')
 
     def run(self):

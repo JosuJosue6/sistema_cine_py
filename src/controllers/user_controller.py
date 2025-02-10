@@ -7,7 +7,7 @@ class UserController:
     def create_user(self, user_data):
         query = "INSERT INTO Users (name, email, password) VALUES (?, ?, ?)"
         self.db_connection.execute_query(query, (user_data['name'], user_data['email'],  user_data['password']))
-        self.db_connection.commit()
+        #self.db_connection.commit()
 
     # Buscar usuario por su ID
     def get_user(self, user_id):
