@@ -1,8 +1,9 @@
-from tkinter import Tk, LEFT, RIGHT, Frame, Label, Scrollbar, StringVar, Entry, Button, END, messagebox, Toplevel, HORIZONTAL, Canvas, OptionMenu, ttk
+from tkinter import Tk, LEFT, RIGHT, Frame, Label, Scrollbar, StringVar, Entry, Button, END, messagebox, Toplevel, HORIZONTAL, Canvas, OptionMenu, ttk, Menu
 from PIL import Image, ImageTk, ImageDraw  # Necesitarás instalar Pillow para manejar imágenes
 from controllers.movie_controller import MovieController
 import os
 from views.ticket_selection_view import TicketSelectionView
+from views.user_detail_view import UserDetailView  
 
 class MovieListView(Frame):
     def __init__(self, master, db_connection, email):
@@ -36,19 +37,28 @@ class MovieListView(Frame):
         if os.path.exists("src/assets/image/image.jpg"):  
             navbar_image = Image.open("src/assets/image/image.jpg")
             navbar_image = navbar_image.resize((60, 60), Image.LANCZOS) 
-
+        
             # Crear una máscara circular
             mask = Image.new("L", navbar_image.size, 0)
             draw = ImageDraw.Draw(mask)
             draw.ellipse((0, 0) + navbar_image.size, fill=255)
             navbar_image.putalpha(mask)
-
+        
             navbar_photo = ImageTk.PhotoImage(navbar_image)
-
+        
             self.navbar_image_label = Label(self.navbar, image=navbar_photo, bg="#333333")
             self.navbar_image_label.image = navbar_photo  # Guardar una referencia para evitar que la imagen sea recolectada por el garbage collector
             self.navbar_image_label.pack(side="right", padx=10, pady=10)
-
+        
+            # Crear el menú desplegable
+            self.navbar_menu = Menu(self.navbar, tearoff=0, bg="#333333", fg="white", font=("Helvetica", 12), activebackground="#1a1a1a", activeforeground="white")
+            self.navbar_menu.add_command(label="Ver perfil", command=self.open_user_detail_view)
+            self.navbar_menu.add_command(label="Cerrar sesión", command=self.logout)
+        
+            # Asociar el menú desplegable a la imagen
+            self.navbar_image_label.bind("<Button-1>", self.show_navbar_menu)
+        
+        
         # Título "Cartelera"
         self.cartelera_label = Label(self, text="Cartelera", font=("Helvetica", 24, "bold"), fg="black")
         self.cartelera_label.pack(pady=(10, 5))  # Reducir el padding superior a 10 y el inferior a 5
@@ -136,6 +146,8 @@ class MovieListView(Frame):
         self.footer_label.pack(pady=10)
 
         self.load_movies()
+    def show_navbar_menu(self, event):
+            self.navbar_menu.post(event.x_root, event.y_root)
 
     def apply_hover_effect(self, widget):
         def on_enter(event):
@@ -308,3 +320,17 @@ class MovieListView(Frame):
         ticket_selection_view = TicketSelectionView(ticket_selection_window, self.movie_controller.db_connection, movie,self.email)
         ticket_selection_view.pack(fill="both", expand=True)
         ticket_selection_window.mainloop()
+
+    def open_user_detail_view(self):
+        user_detail_window = Toplevel(self.master)
+        user_detail_view = UserDetailView(user_detail_window, self.movie_controller.db_connection, self.email)
+        user_detail_view.pack(fill="both", expand=True)
+        user_detail_window.mainloop()
+
+    def logout(self):
+        from views.login_view import LoginView
+        self.master.destroy()
+        login_window = Tk()
+        login_view = LoginView(login_window, self.movie_controller.db_connection)
+        login_view.pack(fill="both", expand=True)
+        login_window.mainloop()

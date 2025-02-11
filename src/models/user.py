@@ -1,8 +1,10 @@
 class User:
     #constructor de la clase
-    def __init__(self, user_id, name, email, password):
+    def __init__(self, user_id, name, lastname,CI,email, password):
         self.user_id = user_id
         self.name = name
+        self.lastname = lastname
+        self.CI = CI
         self.email = email
         self.password = password
         self.purchase_history = []

@@ -1,3 +1,5 @@
+from models.user import User
+
 class UserController:
     def __init__(self, db_connection):
         self.db_connection = db_connection
@@ -5,24 +7,32 @@ class UserController:
     # CRUD básico de usuarios
     # Crear un nuevo usuario
     def create_user(self, user_data):
-        query = "INSERT INTO Users (name, email, password) VALUES (?, ?, ?)"
-        self.db_connection.execute_query(query, (user_data['name'], user_data['email'],  user_data['password']))
-        #self.db_connection.commit()
+        query = "INSERT INTO Users (name, lastname, CI, email, password) VALUES (?, ?, ?, ?, ?)"
+        self.db_connection.execute_query(query, (user_data['name'], user_data['lastname'], user_data['CI'], user_data['email'], user_data['password']))
+        self.db_connection.commit()
 
     # Buscar usuario por su ID
     def get_user(self, user_id):
         query = "SELECT * FROM Users WHERE ID = ?"
-        return self.db_connection.execute_query(query, (user_id,)).fetchone()
+        cursor = self.db_connection.execute_query(query, (user_id,))
+        result = cursor.fetchone()
+        if result:
+            return User(result[0], result[1], result[2], result[3], result[4], result[5])
+        return None
 
     # Obtener correo de usuario por ID
     def get_user_email(self, user_id):
         query = "SELECT email FROM Users WHERE ID = ?"
-        return self.db_connection.execute_query(query, (user_id,)).fetchone()
+        cursor = self.db_connection.execute_query(query, (user_id,))
+        result = cursor.fetchone()
+        if result:
+            return result[0]
+        return None
 
     # Actualizar los datos de un usuario
     def update_user(self, user_id, user_data):
-        query = "UPDATE Users SET name = ?, email = ?, phone = ?, password = ? WHERE ID = ?"
-        self.db_connection.execute_query(query, (user_data['name'], user_data['email'], user_data['phone'], user_data['password'], user_id))
+        query = "UPDATE Users SET name = ?, lastname = ?, CI = ?, email = ?, password = ? WHERE ID = ?"
+        self.db_connection.execute_query(query, (user_data['name'], user_data['lastname'], user_data['CI'], user_data['email'], user_data['password'], user_id))
         self.db_connection.commit()
 
     # Eliminar un usuario
@@ -34,26 +44,40 @@ class UserController:
     # Obtener el historial de compras de un usuario
     def get_purchase_history(self, user_id):
         query = "SELECT * FROM Purchases WHERE user_id = ?"
-        return self.db_connection.execute_query(query, (user_id,)).fetchall()
+        cursor = self.db_connection.execute_query(query, (user_id,))
+        result = cursor.fetchall()
+        return [purchase for purchase in result]
 
     # Obtener usuario por correo electrónico
     def get_user_by_email(self, email):
         query = "SELECT * FROM Users WHERE email = ?"
-        return self.db_connection.execute_query(query, (email,)).fetchone()
+        cursor = self.db_connection.execute_query(query, (email,))
+        result = cursor.fetchone()
+        print(result)
+        if result:
+            return User(result[1], result[2], result[3], result[4], result[5])
+        return None
 
     # Autenticar usuario
     def authenticate_user(self, email, password):
         query = "SELECT * FROM Users WHERE email = ? AND password = ?"
-        user = self.db_connection.execute_query(query, (email, password))
-        if user:
-            print(f"Bienvenido, {user}!")
-            return True
-        else:
-            print("Correo electrónico o contraseña incorrectos.")
-            return False
-        #return 
+        cursor = self.db_connection.execute_query(query, (email, password))
+        result = cursor.fetchone()
+        if result:
+            return User(result[0], result[1], result[2], result[3], result[4], result[5])
+        return None
 
     # Obtener todos los usuarios
     def get_all_users(self):
         query = "SELECT * FROM Users"
-        return self.db_connection.execute_query(query).fetchall()
+        cursor = self.db_connection.execute_query(query)
+        result = cursor.fetchall()
+        return [User(row[0], row[1], row[2], row[3], row[4], row[5]) for row in result]
+    
+    def get_id_by_email(self, email):
+        query = "SELECT ID FROM Users WHERE email = ?"
+        cursor = self.db_connection.execute_query(query, (email,))
+        result = cursor.fetchone()
+        if result:
+            return result[0]
+        return None
