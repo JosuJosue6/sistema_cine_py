@@ -1,4 +1,4 @@
-from tkinter import Tk, Frame, Label, Entry, Button, messagebox, Canvas, Toplevel
+from tkinter import Tk, Frame, Label, Entry, Button, messagebox, Toplevel
 from PIL import Image, ImageTk, ImageDraw
 import os
 from controllers.user_controller import UserController
@@ -12,6 +12,7 @@ class LoginView(Frame):
         self.db_connection = db_connection
         self.email = None
         self.user_controller = UserController(db_connection)
+        self.bg_photo = None
         self.ventana()
 
     def ventana(self):
@@ -20,13 +21,19 @@ class LoginView(Frame):
         self.master.state('zoomed')
         self.master.configure(bg="#000000") 
 
+        # Cargar la imagen de fondo
+        self.load_background_image()
+
+        # Redimensionar la imagen de fondo cuando la ventana cambie de tamaño
+        self.master.bind("<Configure>", self.resize_background)
+
         # Contenedor central con bordes redondeados
         self.container = Frame(self.master, bg="#333333", bd=2, relief="solid")
-        self.container.place(relx=0.5, rely=0.5, anchor="center", width=400, height=500)
+        self.container.place(relx=0.5, rely=0.5, anchor="center", width=400, height=600)
 
         # Frame dentro del contenedor para contener los widgets
         self.inner_frame = Frame(self.container, bg="#000000")
-        self.inner_frame.place(relx=0.5, rely=0.5, anchor="center", width=380, height=480)
+        self.inner_frame.place(relx=0.5, rely=0.5, anchor="center", width=380, height=580)
 
         # Espacio para la imagen redondeada
         if os.path.exists("src/assets/image/image.jpg"):  # Reemplaza con la ruta de tu imagen
@@ -60,10 +67,10 @@ class LoginView(Frame):
 
         button_width = 20  # Ancho de los botones
 
-        self.login_button = Button(self.inner_frame, text="Iniciar Sesión", command=self.login, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2, width=button_width)
+        self.login_button = Button(self.inner_frame, text="Iniciar Sesión", command=self.login, font=("Arial", 14, "bold"), bg="#F5A900", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2, width=button_width)
         self.login_button.pack(pady=20)
 
-        self.register_button = Button(self.inner_frame, text="Registrar", command=self.open_register_view, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2, width=button_width)
+        self.register_button = Button(self.inner_frame, text="Registrar", command=self.open_register_view, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2, width=button_width, highlightbackground="#F5A900", highlightthickness=2)
         self.register_button.pack(pady=10)
 
         # Vincular la tecla "Enter" al método login
@@ -75,6 +82,25 @@ class LoginView(Frame):
 
         self.footer_label = Label(self.footer, text="© 2025 Sistema de Cine. Todos los derechos reservados.", font=("Helvetica", 10), bg="#333333", fg="white")
         self.footer_label.pack(pady=10)
+
+    def load_background_image(self):
+        if os.path.exists("src/assets/Test.jpg"):  # Reemplaza con la ruta de tu imagen de fondo
+            bg_image = Image.open("src/assets/Test.jpg")
+            screen_width = self.master.winfo_screenwidth()
+            screen_height = self.master.winfo_screenheight()
+            bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
+            self.bg_photo = ImageTk.PhotoImage(bg_image)
+            self.bg_label = Label(self.master, image=self.bg_photo)
+            self.bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+    def resize_background(self, event):
+        if self.bg_photo:
+            screen_width = self.master.winfo_width()
+            screen_height = self.master.winfo_height()
+            bg_image = Image.open("src/assets/Test.jpg")
+            bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
+            self.bg_photo = ImageTk.PhotoImage(bg_image)
+            self.bg_label.config(image=self.bg_photo)
 
     def login(self):
         self.email = self.email_entry.get()
