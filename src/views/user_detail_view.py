@@ -15,12 +15,19 @@ class UserDetailView(Frame):
             messagebox.showerror("Error", "Usuario no encontrado.")
             self.master.destroy()
         else:
+            self.bg_photo = None
             self.init_ui()
 
     def init_ui(self):
         self.master.title("Detalles del Usuario")
         self.master.state('zoomed')
-        self.master.configure(bg="#f0f0f0")
+        self.master.configure(bg="#000000")
+
+        # Cargar la imagen de fondo
+        self.load_background_image()
+
+        # Redimensionar la imagen de fondo cuando la ventana cambie de tamaño
+        self.master.bind("<Configure>", self.resize_background)
 
         # Navbar
         self.navbar = Frame(self.master, bg="#333333", height=70)
@@ -46,45 +53,47 @@ class UserDetailView(Frame):
 
         # Main container with border
         self.container = Frame(self.master, bg="#f0f0f0", bd=2, relief="solid", highlightbackground="black", highlightthickness=2)
-        self.container.place(relx=0.5, rely=0.5, anchor="center")
+        self.container.place(relx=0.5, rely=0.5, anchor="center", width=400, height=600)
 
         self.title_label = Label(self.container, text="Detalles del Usuario", font=("Arial", 18, "bold"), bg="#f0f0f0", fg="#333")
         self.title_label.pack(pady=10)
 
         self.name_label = Label(self.container, text="Nombre:", font=("Arial", 12), bg="#f0f0f0", fg="#333")
-        self.name_label.pack(pady=5)
+        self.name_label.pack(pady=10)
         self.name_entry = Entry(self.container, font=("Arial", 12))
-        self.name_entry.pack(pady=5)
+        self.name_entry.pack(pady=10)
         self.name_entry.insert(0, self.user.name)
 
         self.lastname_label = Label(self.container, text="Apellido:", font=("Arial", 12), bg="#f0f0f0", fg="#333")
-        self.lastname_label.pack(pady=5)
+        self.lastname_label.pack(pady=10)
         self.lastname_entry = Entry(self.container, font=("Arial", 12))
-        self.lastname_entry.pack(pady=5)
+        self.lastname_entry.pack(pady=10)
         self.lastname_entry.insert(0, self.user.lastname)
 
         self.ci_label = Label(self.container, text="CI:", font=("Arial", 12), bg="#f0f0f0", fg="#333")
-        self.ci_label.pack(pady=5)
+        self.ci_label.pack(pady=10)
         self.ci_entry = Entry(self.container, font=("Arial", 12))
-        self.ci_entry.pack(pady=5)
+        self.ci_entry.pack(pady=10)
         self.ci_entry.insert(0, self.user.CI)
 
         self.email_label = Label(self.container, text="Correo Electrónico:", font=("Arial", 12), bg="#f0f0f0", fg="#333")
-        self.email_label.pack(pady=5)
+        self.email_label.pack(pady=10)
         self.email_entry = Entry(self.container, font=("Arial", 12))
-        self.email_entry.pack(pady=5)
+        self.email_entry.pack(pady=10)
         self.email_entry.insert(0, self.user.email)
 
         self.password_label = Label(self.container, text="Contraseña:", font=("Arial", 12), bg="#f0f0f0", fg="#333")
-        self.password_label.pack(pady=5)
+        self.password_label.pack(pady=10)
         self.password_entry = Entry(self.container, font=("Arial", 12), show="*")
-        self.password_entry.pack(pady=5)
+        self.password_entry.pack(pady=10)
         self.password_entry.insert(0, self.user.password)
 
-        self.update_button = Button(self.container, text="Actualizar", font=("Arial", 12, "bold"), bg="#333", fg="white", command=self.update_user)
+        button_width = 20  # Ancho de los botones
+
+        self.update_button = Button(self.container, text="Actualizar", font=("Arial", 12, "bold"), bg="#333", fg="white", command=self.update_user, width=button_width)
         self.update_button.pack(pady=10)
 
-        self.delete_button = Button(self.container, text="Eliminar", font=("Arial", 12, "bold"), bg="#333", fg="white", command=self.delete_user)
+        self.delete_button = Button(self.container, text="Eliminar", font=("Arial", 12, "bold"), bg="#333", fg="white", command=self.delete_user, width=button_width)
         self.delete_button.pack(pady=10)
 
         # Footer
@@ -93,6 +102,25 @@ class UserDetailView(Frame):
 
         self.footer_label = Label(self.footer, text="© 2025 Sistema de Cine. Todos los derechos reservados.", font=("Helvetica", 10), bg="#333333", fg="white")
         self.footer_label.pack(pady=10)
+
+    def load_background_image(self):
+        if os.path.exists("src/assets/Test.jpg"):  # Reemplaza con la ruta de tu imagen de fondo
+            bg_image = Image.open("src/assets/Test.jpg")
+            screen_width = self.master.winfo_screenwidth()
+            screen_height = self.master.winfo_screenheight()
+            bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
+            self.bg_photo = ImageTk.PhotoImage(bg_image)
+            self.bg_label = Label(self.master, image=self.bg_photo)
+            self.bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+    def resize_background(self, event):
+        if self.bg_photo:
+            screen_width = self.master.winfo_width()
+            screen_height = self.master.winfo_height()
+            bg_image = Image.open("src/assets/Test.jpg")
+            bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
+            self.bg_photo = ImageTk.PhotoImage(bg_image)
+            self.bg_label.config(image=self.bg_photo)
 
     def update_user(self):
         name = self.name_entry.get()
