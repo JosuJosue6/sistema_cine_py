@@ -58,10 +58,12 @@ class LoginView(Frame):
         self.password_entry = Entry(self.inner_frame, font=("Arial", 14), width=30, show="*")
         self.password_entry.pack(pady=5)
 
-        self.login_button = Button(self.inner_frame, text="Iniciar Sesión", command=self.login, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
+        button_width = 20  # Ancho de los botones
+
+        self.login_button = Button(self.inner_frame, text="Iniciar Sesión", command=self.login, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2, width=button_width)
         self.login_button.pack(pady=20)
 
-        self.register_button = Button(self.inner_frame, text="Registrar", command=self.open_register_view, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
+        self.register_button = Button(self.inner_frame, text="Registrar", command=self.open_register_view, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2, width=button_width)
         self.register_button.pack(pady=10)
 
         # Vincular la tecla "Enter" al método login
