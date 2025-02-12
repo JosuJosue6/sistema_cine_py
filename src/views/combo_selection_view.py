@@ -1,4 +1,4 @@
-from tkinter import Frame, Label, Button, Listbox, StringVar, Entry, messagebox, Toplevel, Radiobutton, IntVar
+from tkinter import Frame, Label, Button, Listbox, StringVar, Entry, messagebox, Toplevel, Radiobutton, IntVar, Canvas, Scrollbar
 from views.promotions_view import PromotionsView  # Asegúrate de importar la clase PromotionsView
 from PIL import Image, ImageTk, ImageDraw  # Necesitarás instalar Pillow para manejar imágenes
 import os
@@ -53,32 +53,47 @@ class CombosSelectionView(Frame):
 
         # Contenedor central con borde negro
         self.container = Frame(self.master, bg="#ffffff", bd=2, relief="solid", highlightbackground="black", highlightthickness=2)
-        self.container.place(relx=0.5, rely=0.5, anchor="center", width=600, height=600)
+        self.container.place(relx=0.5, rely=0.5, anchor="center", width=800, height=600)
 
         self.title_label = Label(self.container, text=f"Selecciona tus combos para: {self.movie.title}", font=("Helvetica", 18, "bold"), bg="#ffffff", fg="black")
         self.title_label.pack(pady=10)
 
-        self.combo_listbox = Listbox(self.container, selectmode="multiple", width=50, font=("Helvetica", 14), bg="#1a1a1a", fg="white", bd=2, relief="groove")
-        self.combo_listbox.bind('<<ListboxSelect>>', self.update_total_price)
-        for combo in self.combos:
-            self.combo_listbox.insert("end", f"{combo.description} - ${combo.price:.2f}")
-        self.combo_listbox.pack(pady=10)
+        # Crear un canvas con scrollbar para la lista de combos
+        self.canvas = Canvas(self.container, bg="#ffffff")
+        self.scrollbar = Scrollbar(self.container, orient="vertical", command=self.canvas.yview)
+        self.scrollable_frame = Frame(self.canvas, bg="#ffffff")
 
-        self.subtotal_label = Label(self.container, text=f"Costo de boletos: ${self.subtotal:.2f}", font=("Helvetica", 16, "bold"), bg="#ffffff", fg="black")
-        self.subtotal_label.pack(pady=10)
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(
+                scrollregion=self.canvas.bbox("all")
+            )
+        )
 
-        self.total_price_label = Label(self.container, text=f"Precio total estimado: ${self.total_price:.2f}", font=("Helvetica", 16, "bold"), bg="#ffffff", fg="black")
-        self.total_price_label.pack(pady=10)
+        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="n")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
 
-        self.summary_button = Button(self.container, text="Continuar", command=self.show_customization_window, font=("Helvetica", 14, "bold"), bg="#333333", fg="white", bd=2, relief="raised")
-        self.summary_button.pack(pady=10)
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
+
+        # Crear la lista de combos con imágenes
+        self.create_combo_list()
 
         # Pie de página
-        self.footer = Frame(self.master, bg="#333333", height=50)
+        self.footer = Frame(self.master, bg="#333333", height=100)
         self.footer.pack(side="bottom", fill="x")
 
+        self.subtotal_label = Label(self.footer, text=f"Costo de boletos: ${self.subtotal:.2f}", font=("Helvetica", 16, "bold"), bg="#333333", fg="white")
+        self.subtotal_label.pack(side="left", padx=20, pady=10)
+
+        self.total_price_label = Label(self.footer, text=f"Precio total estimado: ${self.total_price:.2f}", font=("Helvetica", 16, "bold"), bg="#333333", fg="white")
+        self.total_price_label.pack(side="left", padx=20, pady=10)
+
+        self.summary_button = Button(self.footer, text="Continuar", command=self.show_customization_window, font=("Helvetica", 14, "bold"), bg="#ffffff", fg="#333333", bd=2, relief="raised")
+        self.summary_button.pack(side="right", padx=20, pady=10)
+
         self.footer_label = Label(self.footer, text="© 2025 Sistema de Cine. Todos los derechos reservados.", font=("Helvetica", 10), bg="#333333", fg="white")
-        self.footer_label.pack(pady=10)
+        self.footer_label.pack(side="bottom", pady=10)
 
     # Método para cargar los combos desde la base de datos
     def load_combos(self):
@@ -87,20 +102,51 @@ class CombosSelectionView(Frame):
             print(combo)  
         return combos
 
+    # Método para crear la lista de combos con imágenes
+    def create_combo_list(self):
+        for combo in self.combos:
+            combo_frame = Frame(self.scrollable_frame, bg="#ffffff", bd=2, relief="solid", padx=10, pady=10, width=700)
+            combo_frame.pack(fill="x", pady=5)
+            index = 2
+            # Cargar la imagen del combo
+            image_path = f"src/assets/combos/combo{index}.jpg"  # Reemplaza con la ruta de tu imagen
+            print(index)
+            if os.path.exists(image_path):
+                combo_image = Image.open(image_path)
+                combo_image = combo_image.resize((100, 100), Image.LANCZOS)
+                combo_photo = ImageTk.PhotoImage(combo_image)
+
+                combo_image_label = Label(combo_frame, image=combo_photo, bg="#ffffff")
+                combo_image_label.image = combo_photo  # Guardar una referencia para evitar que la imagen sea recolectada por el garbage collector
+                combo_image_label.pack(side="right", padx=10)
+            index += 1
+            
+            combo_description = f"{combo.description} - ${combo.price:.2f}"
+            combo_label = Label(combo_frame, text=combo_description, font=("Helvetica", 14), bg="#ffffff", fg="black", wraplength=500, justify="left")
+            combo_label.pack(side="left", padx=10)
+
+            combo_frame.bind("<Button-1>", lambda e, combo=combo: self.toggle_combo_selection(combo))
+
+    # Método para alternar la selección de un combo
+    def toggle_combo_selection(self, combo):
+        if combo in self.selected_combos:
+            self.selected_combos.remove(combo)
+        else:
+            self.selected_combos.append(combo)
+        self.update_total_price()
+
     # Método para actualizar el precio total
     def update_total_price(self, event=None):
-        selected_indices = self.combo_listbox.curselection()
-        if not selected_indices:
+        if not self.selected_combos:
             self.total_price = self.subtotal
         else:
-            self.total_price = self.subtotal + sum(self.combos[i].price for i in selected_indices)
+            self.total_price = self.subtotal + sum(combo.price for combo in self.selected_combos)
         self.total_price_label.config(text=f"Precio total estimado: ${self.total_price:.2f}")
 
     # Método para mostrar la ventana de personalización
     def show_customization_window(self):
-        selected_indices = self.combo_listbox.curselection()
-        if not selected_indices:
-            pass
+        if not self.selected_combos:
+            return
 
         customization_window = Toplevel(self.master)
         customization_window.title("Adicionales")
@@ -148,7 +194,7 @@ class CombosSelectionView(Frame):
             'movie': self.movie.title,
             'ticket_count': len(self.selected_seats),
             'seats': [f"{seat.row}{seat.number}" for seat in self.selected_seats],
-            'combos': [self.combos[i].description for i in self.combo_listbox.curselection()],
+            'combos': [combo.description for combo in self.selected_combos],
             'promotions': [],
             'total': self.total_price
         }

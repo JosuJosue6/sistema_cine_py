@@ -17,7 +17,8 @@ class UserController:
         cursor = self.db_connection.execute_query(query, (user_id,))
         result = cursor.fetchone()
         if result:
-            return User(result[0], result[1], result[2], result[3], result[4], result[5])
+            user_data = [field if field is not None else "" for field in result]
+            return User(user_data[0], user_data[1], user_data[5], user_data[6], user_data[2], user_data[4])
         return None
 
     # Obtener correo de usuario por ID
@@ -64,7 +65,9 @@ class UserController:
         cursor = self.db_connection.execute_query(query, (email, password))
         result = cursor.fetchone()
         if result:
-            return User(result[0], result[1], result[2], result[3], result[4], result[5])
+           # print(result)
+            #print("******",User(result[0], result[1], result[5], result[6], result[2], result[4]))
+            return User(result[0], result[1], result[5], result[6], result[2], result[4])
         return None
 
     # Obtener todos los usuarios

@@ -1,4 +1,4 @@
-from tkinter import Frame, Label, Entry, Button, messagebox
+from tkinter import Frame, Label, Entry, Button, messagebox, Toplevel
 from controllers.user_controller import UserController
 
 class UserDetailView(Frame):
@@ -51,7 +51,7 @@ class UserDetailView(Frame):
         self.password_label.pack(pady=5)
         self.password_entry = Entry(self, font=("Arial", 12), show="*")
         self.password_entry.pack(pady=5)
-#        self.password_entry.insert(0, self.user.password)
+        self.password_entry.insert(0, self.user.password)
 
         self.update_button = Button(self, text="Actualizar", font=("Arial", 12, "bold"), bg="#333", fg="white", command=self.update_user)
         self.update_button.pack(pady=10)
@@ -90,9 +90,17 @@ class UserDetailView(Frame):
             try:
                 self.user_controller.delete_user(self.user_id)
                 messagebox.showinfo("Éxito", "Usuario eliminado exitosamente.")
+                self.open_login_view()
                 self.master.destroy()
             except Exception as e:
                 messagebox.showerror("Error", f"No se pudo eliminar el usuario. Error: {e}")
+
+    def open_login_view(self):
+        from views.login_view import LoginView  # Importación diferida para evitar importación circular
+        login_window = Toplevel(self.master)
+        login_view = LoginView(login_window, self.db_connection)
+        login_view.pack(fill="both", expand=True)
+        login_window.mainloop()
 
     def run(self):
         self.pack()
