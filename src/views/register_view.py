@@ -145,11 +145,10 @@ class RegisterUserView(Frame):
         }
 
         try:
-            if(self.send_verification_email(email)):
+            if self.send_verification_email(email):
                 self.user_controller.create_user(user_data)
                 messagebox.showinfo("Éxito", "Usuario registrado exitosamente. Se ha enviado un correo de verificación.")
-
-            self.clear_entries()
+                self.clear_entries()
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo registrar el usuario. Error: {e}")
 
@@ -183,10 +182,12 @@ class RegisterUserView(Frame):
         result = mailjet.send.create(data=data)
         if result.status_code == 200:
             print("Correo de verificación enviado exitosamente")
+            return True
         else:
             messagebox.showerror("Error de Envío", "No se pudo enviar el correo electrónico. Verifica tu correo.")
             print(f"Error: {result.status_code}")
             print(result.json())
+            return False
 
     def clear_entries(self):
         self.name_entry.delete(0, 'end')
