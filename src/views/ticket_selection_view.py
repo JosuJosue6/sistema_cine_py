@@ -1,9 +1,10 @@
-from tkinter import Frame, Label, Button, StringVar, OptionMenu, messagebox, Toplevel, Entry, IntVar
+from tkinter import Frame, Label, Button, StringVar, OptionMenu, messagebox, Toplevel, Entry, IntVar,Menu,Tk
 from views.seat_selection_view import SeatSelectionView
 from models.seat import Seat
 from PIL import Image, ImageTk, ImageDraw  # Necesitarás instalar Pillow para manejar imágenes
 import os
 from controllers.ticket_controller import TicketController
+from views.user_detail_view import UserDetailView 
 
 class TicketSelectionView(Frame):
     def __init__(self, master, db_connection, movie, email):
@@ -25,6 +26,12 @@ class TicketSelectionView(Frame):
         # Maximizar la ventana
         self.master.state('zoomed')
         self.master.configure(bg="#ffffff")  # Fondo blanco
+
+        # Cargar la imagen de fondo
+        self.load_background_image()
+
+        # Redimensionar la imagen de fondo cuando la ventana cambie de tamaño
+        self.master.bind("<Configure>", self.resize_background)
 
         # Barra de navegación
         self.navbar = Frame(self.master, bg="#333333", height=100)  # Fondo gris claro
@@ -50,10 +57,18 @@ class TicketSelectionView(Frame):
             self.navbar_image_label.image = navbar_photo  # Guardar una referencia para evitar que la imagen sea recolectada por el garbage collector
             self.navbar_image_label.pack(side="right", padx=10, pady=10)
 
+            # Crear el menú desplegable
+            self.navbar_menu = Menu(self.navbar, tearoff=0, bg="#333333", fg="white", font=("Helvetica", 12), activebackground="#1a1a1a", activeforeground="white")
+            self.navbar_menu.add_command(label="Ver perfil", command=self.open_user_detail_view)
+            self.navbar_menu.add_command(label="Cerrar sesión", command=self.logout)
+            
+            # Asociar el menú desplegable a la imagen
+            self.navbar_image_label.bind("<Button-1>", self.show_navbar_menu)
+
         self.ticket_count_var = IntVar()
 
         # Contenedor central con borde negro
-        self.container = Frame(self, bg="#ffffff", bd=2, relief="solid", highlightbackground="black", highlightthickness=2)
+        self.container = Frame(self.master, bg="#ffffff", bd=2, relief="solid", highlightbackground="black", highlightthickness=2)
         self.container.place(relx=0.5, rely=0.5, anchor="center", width=600, height=600)
 
         Label(self.container, text=f"Seleccionar boletos para: {self.movie.title}", font=("Arial", 14), bg="#ffffff", fg="black").pack(pady=10)
@@ -160,3 +175,39 @@ class TicketSelectionView(Frame):
     def run(self):
         self.pack()
         self.master.mainloop()
+
+    def load_background_image(self):
+        if os.path.exists("src/assets/Test.jpg"):  # Reemplaza con la ruta de tu imagen de fondo
+            bg_image = Image.open("src/assets/Test.jpg")
+            screen_width = self.master.winfo_screenwidth()
+            screen_height = self.master.winfo_screenheight()
+            bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
+            self.bg_photo = ImageTk.PhotoImage(bg_image)
+            self.bg_label = Label(self.master, image=self.bg_photo)
+            self.bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+    def resize_background(self, event):
+        if self.bg_photo:
+            screen_width = self.master.winfo_width()
+            screen_height = self.master.winfo_height()
+            bg_image = Image.open("src/assets/Test.jpg")
+            bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
+            self.bg_photo = ImageTk.PhotoImage(bg_image)
+            self.bg_label.config(image=self.bg_photo)
+    
+    def show_navbar_menu(self, event):
+            self.navbar_menu.post(event.x_root, event.y_root)
+
+    def open_user_detail_view(self):
+        user_detail_window = Toplevel(self.master)
+        user_detail_view = UserDetailView(user_detail_window, self.movie_controller.db_connection, self.email)
+        user_detail_view.pack(fill="both", expand=True)
+        user_detail_window.mainloop()
+
+    def logout(self):
+        from views.login_view import LoginView
+        self.master.destroy()
+        login_window = Tk()
+        login_view = LoginView(login_window, self.movie_controller.db_connection)
+        login_view.pack(fill="both", expand=True)
+        login_window.mainloop() 

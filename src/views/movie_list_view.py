@@ -20,18 +20,22 @@ class MovieListView(Frame):
     # Método para crear los widgets de la interfaz
     def create_widgets(self):
         self.master.title("Cartelera de Películas")
-
         # Maximizar la ventana
         self.master.state('zoomed')
-        
         self.master.configure(bg="#000000")  # Fondo negro
 
-        # Barra de navegación
-        self.navbar = Frame(self, bg="#333333", height=100)  # Fondo gris oscuro y altura aumentada
+        # Cargar la imagen de fondo
+        self.load_background_image()
+
+        # Redimensionar la imagen de fondo cuando la ventana cambie de tamaño
+        self.master.bind("<Configure>", self.resize_background)
+        
+         # Navbar
+        self.navbar = Frame(self.master, bg="#333333", height=70)
         self.navbar.pack(side="top", fill="x")
 
-        self.navbar_label = Label(self.navbar, text="Sistema de CINE", font=("Helvetica", 30, "bold"), bg="#333333", fg="white", padx=10)
-        self.navbar_label.pack(side="left", padx=(10, 200), pady=10)  # Mover más a la izquierda
+        self.navbar_label = Label(self.navbar, text="Sistema de CINE", font=("Helvetica", 24, "bold"), bg="#333333", fg="white", padx=10)
+        self.navbar_label.pack(side="left", padx=(10, 400), pady=10)
 
         # Cargar la imagen para la navbar
         if os.path.exists("src/assets/image/image.jpg"):  
@@ -54,20 +58,19 @@ class MovieListView(Frame):
             self.navbar_menu = Menu(self.navbar, tearoff=0, bg="#333333", fg="white", font=("Helvetica", 12), activebackground="#1a1a1a", activeforeground="white")
             self.navbar_menu.add_command(label="Ver perfil", command=self.open_user_detail_view)
             self.navbar_menu.add_command(label="Cerrar sesión", command=self.logout)
-        
+            
             # Asociar el menú desplegable a la imagen
             self.navbar_image_label.bind("<Button-1>", self.show_navbar_menu)
         
-        
         # Título "Cartelera"
-        self.cartelera_label = Label(self, text="Cartelera", font=("Helvetica", 24, "bold"), fg="black")
+        self.cartelera_label = Label(self.master, text="Cartelera", font=("Helvetica", 24, "bold"), fg="black", width=20, height=2, bg="#FFD700")
         self.cartelera_label.pack(pady=(10, 5))  # Reducir el padding superior a 10 y el inferior a 5
 
         # Barra de búsqueda
         self.search_entry = Entry(self.navbar, width=30, font=("Helvetica", 14), fg="#999999")  # Hacer la barra de búsqueda más grande y cambiar el color del placeholder
         self.search_entry.insert(0, "Buscar por nombre")  # Placeholder
         self.search_entry.bind("<FocusIn>", lambda event: self.search_entry.delete(0, END))
-        self.search_entry.pack(side="left", padx=10, pady=10)
+        self.search_entry.place(relx=0.5, rely=0.5, anchor="center")
         self.search_entry.bind("<Return>", self.filter_movies)
         self.search_entry.config(highlightbackground="#333333", highlightcolor="#333333", highlightthickness=1, bd=0, relief="solid")
         self.search_entry.bind("<FocusOut>", self.on_focus_out)
@@ -82,12 +85,12 @@ class MovieListView(Frame):
             "activebackground": "#1a1a1a",
             "activeforeground": "white",
             "font": ("Helvetica", 12),
-            "width": 15  # Fijar el ancho de los menús desplegables
+            "width": 12  # Fijar el ancho de los menús desplegables
         }
 
         # Frame para los filtros
         self.filters_frame = Frame(self.navbar, bg="#333333")
-        self.filters_frame.pack(side="left", padx=10, pady=10)  # Mover más a la izquierda
+        self.filters_frame.pack(side="right", padx=10, pady=10)  # Mover más a la izquierda
 
         genres = ["Género", "Todos", "Acción","Animación", "Aventura", "Comedia", "Documental","Horror", "Terror", "Thriller"]  # Ejemplo de géneros
         classifications = ["Clasificación", "Todos", "12+ años", "15+ años"]  # Ejemplo de clasificaciones
@@ -107,16 +110,11 @@ class MovieListView(Frame):
         self.language_menu.config(**self.option_menu_style)
         self.language_menu["menu"].config(bg="#333333", fg="white", font=("Helvetica", 12), activebackground="#1a1a1a", activeforeground="white")  # Cambiar el color de fondo y texto de la lista desplegable
         self.language_menu.pack(side="left", padx=10, pady=10)
-
-        # Aplicar estilo de subrayado y cambio de color al pasar el cursor sobre las listas desplegables
-        self.apply_hover_effect(self.genre_menu)
-        self.apply_hover_effect(self.classification_menu)
-        self.apply_hover_effect(self.language_menu)
-
-        self.canvas_frame = Frame(self, bg="#000000")
+        
+        self.canvas_frame = Frame(self.master, bg="#111111")
         self.canvas_frame.pack(side="top", fill="both", expand=True)
 
-        self.canvas = Canvas(self.canvas_frame, bg="#000000")
+        self.canvas = Canvas(self.canvas_frame, bg="#000000", height=500)
         self.canvas.pack(side="top", fill="both", expand=True)
 
          # Crear un estilo personalizado para la barra de desplazamiento
@@ -134,30 +132,17 @@ class MovieListView(Frame):
         self.details_label = Label(self, text="", wraplength=600, justify="left", font=("Helvetica", 12), bg="#000000", fg="white")
         self.details_label.pack(pady=10)
 
-        self.quit_button = Button(self, text="Salir", command=self.master.quit, font=("Helvetica", 16, "bold"), bg="#1a1a1a", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
-        self.quit_button.pack(pady=(5, 10))  # Reducir el padding superior a 5 y el inferior a 10
-        #self.quit_button.config(width=20, height=2, borderwidth=2, relief="groove", highlightbackground="#555555", highlightcolor="#555555", highlightthickness=2)
-
         # Pie de página
-        self.footer = Frame(self, bg="#333333", height=50)
+        self.footer = Frame(self.master, bg="#333333", height=50)
         self.footer.pack(side="bottom", fill="x")
 
         self.footer_label = Label(self.footer, text="© 2025 Sistema de Cine. Todos los derechos reservados.", font=("Helvetica", 10), bg="#333333", fg="white")
         self.footer_label.pack(pady=10)
 
         self.load_movies()
+
     def show_navbar_menu(self, event):
             self.navbar_menu.post(event.x_root, event.y_root)
-
-    def apply_hover_effect(self, widget):
-        def on_enter(event):
-            widget.config(fg="#FFD700", underline=True)
-
-        def on_leave(event):
-            widget.config(fg="white", underline=False)
-
-        widget.bind("<Enter>", on_enter)
-        widget.bind("<Leave>", on_leave)
 
     def on_focus_out(self, event):
         if not self.search_entry.get():
@@ -242,6 +227,12 @@ class MovieListView(Frame):
         # Maximizar la ventana
         popup.state('zoomed')
 
+        # Cargar la imagen de fondo
+        self.load_background_image()
+
+        # Redimensionar la imagen de fondo cuando la ventana cambie de tamaño
+        popup.master.bind("<Configure>", self.resize_background)
+
         # Barra de navegación para la ventana emergente
         navbar = Frame(popup, bg="#333333", height=70)  # Fondo gris oscuro
         navbar.pack(side="top", fill="x")
@@ -264,6 +255,14 @@ class MovieListView(Frame):
             navbar_image_label = Label(navbar, image=navbar_photo, bg="#333333")
             navbar_image_label.image = navbar_photo  # Guardar una referencia para evitar que la imagen sea recolectada por el garbage collector
             navbar_image_label.pack(side="right", padx=10, pady=10)
+
+             # Crear el menú desplegable
+            self.navbar_menu = Menu(self.navbar, tearoff=0, bg="#333333", fg="white", font=("Helvetica", 12), activebackground="#1a1a1a", activeforeground="white")
+            self.navbar_menu.add_command(label="Ver perfil", command=self.open_user_detail_view)
+            self.navbar_menu.add_command(label="Cerrar sesión", command=self.logout)
+            
+            # Asociar el menú desplegable a la imagen
+            navbar_image_label.bind("<Button-1>", self.show_navbar_menu)
 
         # Frame para contener la imagen y los detalles
         content_frame = Frame(popup, bd=2, highlightbackground="black", highlightthickness=2, width=500, height=500)
@@ -334,3 +333,22 @@ class MovieListView(Frame):
         login_view = LoginView(login_window, self.movie_controller.db_connection)
         login_view.pack(fill="both", expand=True)
         login_window.mainloop()
+
+    def load_background_image(self):
+        if os.path.exists("src/assets/Test.jpg"):  # Reemplaza con la ruta de tu imagen de fondo
+            bg_image = Image.open("src/assets/Test.jpg")
+            screen_width = self.master.winfo_screenwidth()
+            screen_height = self.master.winfo_screenheight()
+            bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
+            self.bg_photo = ImageTk.PhotoImage(bg_image)
+            self.bg_label = Label(self.master, image=self.bg_photo)
+            self.bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+    def resize_background(self, event):
+        if self.bg_photo:
+            screen_width = self.master.winfo_width()
+            screen_height = self.master.winfo_height()
+            bg_image = Image.open("src/assets/Test.jpg")
+            bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
+            self.bg_photo = ImageTk.PhotoImage(bg_image)
+            self.bg_label.config(image=self.bg_photo)

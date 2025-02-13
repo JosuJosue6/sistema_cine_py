@@ -28,6 +28,12 @@ class PromotionsView(Frame):
         self.master.state('zoomed')
         self.master.configure(bg="white")  # Fondo blanco
 
+        # Cargar la imagen de fondo
+        self.load_background_image()
+
+        # Redimensionar la imagen de fondo cuando la ventana cambie de tamaño
+        self.master.bind("<Configure>", self.resize_background)
+
         # Barra de navegación
         self.navbar = Frame(self.master, bg="#333333", height=100)  # Fondo gris oscuro
         self.navbar.pack(side="top", fill="x")
@@ -112,3 +118,22 @@ class PromotionsView(Frame):
         summary_view = SummaryView(summary_window, self.purchase_summary, self.db, self.user_email)
         summary_view.pack()
         summary_window.protocol("WM_DELETE_WINDOW", lambda: (self.master.deiconify(), summary_window.destroy()))  # Mostrar la ventana principal cuando se cierre la nueva ventana
+
+    def load_background_image(self):
+        if os.path.exists("src/assets/Test.jpg"):  # Reemplaza con la ruta de tu imagen de fondo
+            bg_image = Image.open("src/assets/Test.jpg")
+            screen_width = self.master.winfo_screenwidth()
+            screen_height = self.master.winfo_screenheight()
+            bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
+            self.bg_photo = ImageTk.PhotoImage(bg_image)
+            self.bg_label = Label(self.master, image=self.bg_photo)
+            self.bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+    def resize_background(self, event):
+        if self.bg_photo:
+            screen_width = self.master.winfo_width()
+            screen_height = self.master.winfo_height()
+            bg_image = Image.open("src/assets/Test.jpg")
+            bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
+            self.bg_photo = ImageTk.PhotoImage(bg_image)
+            self.bg_label.config(image=self.bg_photo)
