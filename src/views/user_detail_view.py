@@ -11,12 +11,18 @@ class UserDetailView(Frame):
         self.user_controller = UserController(db_connection)
         self.user_id = self.user_controller.get_id_by_email(user_email)
         self.user = self.user_controller.get_user(self.user_id)
+        #self.bg_image = "src/assets/cine1.jpeg" 
+        #self.bg_image = "src/assets/cine2.jpeg" 
+        #self.bg_image = "src/assets/cine3.jpeg" 
+        #self.bg_image = "src/assets/cine4.jpeg" 
+        self.bg_image = "src/assets/Test.jpg"
         if self.user is None:
             messagebox.showerror("Error", "Usuario no encontrado.")
             self.master.destroy()
         else:
             self.bg_photo = None
             self.init_ui()
+        
 
     def init_ui(self):
         self.master.title("Detalles del Usuario")
@@ -104,8 +110,8 @@ class UserDetailView(Frame):
         self.footer_label.pack(pady=10)
 
     def load_background_image(self):
-        if os.path.exists("src/assets/Test.jpg"):  # Reemplaza con la ruta de tu imagen de fondo
-            bg_image = Image.open("src/assets/Test.jpg")
+        if os.path.exists(self.bg_image):  # Reemplaza con la ruta de tu imagen de fondo
+            bg_image = Image.open(self.bg_image)
             screen_width = self.master.winfo_screenwidth()
             screen_height = self.master.winfo_screenheight()
             bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
@@ -117,7 +123,7 @@ class UserDetailView(Frame):
         if self.bg_photo:
             screen_width = self.master.winfo_width()
             screen_height = self.master.winfo_height()
-            bg_image = Image.open("src/assets/Test.jpg")
+            bg_image = Image.open(self.bg_image)
             bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
             self.bg_photo = ImageTk.PhotoImage(bg_image)
             self.bg_label.config(image=self.bg_photo)

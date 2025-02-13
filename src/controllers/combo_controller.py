@@ -9,7 +9,7 @@ class ComboController:
         query = "SELECT * FROM Combos"
         result = self.db_connection.execute_query(query)
         if result:
-            combos = [Combo(row[0], row[1], row[2]) for row in result]
+            combos = [Combo(row[0], row[1], row[2],row[3]) for row in result]
             return combos
         return []
 

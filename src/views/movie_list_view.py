@@ -15,6 +15,13 @@ class MovieListView(Frame):
         self.genre_var = StringVar(value="Género")
         self.classification_var = StringVar(value="Clasificación")
         self.language_var = StringVar(value="Idioma")
+
+        #self.bg_image = "src/assets/cine1.jpeg" 
+        #self.bg_image = "src/assets/cine2.jpeg" 
+        #self.bg_image = "src/assets/cine3.jpeg" 
+        #self.bg_image = "src/assets/cine4.jpeg" 
+        self.bg_image = "src/assets/Test.jpg"
+
         self.create_widgets()
 
     # Método para crear los widgets de la interfaz
@@ -228,10 +235,10 @@ class MovieListView(Frame):
         popup.state('zoomed')
 
         # Cargar la imagen de fondo
-        self.load_background_image()
+
 
         # Redimensionar la imagen de fondo cuando la ventana cambie de tamaño
-        popup.master.bind("<Configure>", self.resize_background)
+        self.master.bind("<Configure>", self.resize_background)
 
         # Barra de navegación para la ventana emergente
         navbar = Frame(popup, bg="#333333", height=70)  # Fondo gris oscuro
@@ -335,8 +342,8 @@ class MovieListView(Frame):
         login_window.mainloop()
 
     def load_background_image(self):
-        if os.path.exists("src/assets/Test.jpg"):  # Reemplaza con la ruta de tu imagen de fondo
-            bg_image = Image.open("src/assets/Test.jpg")
+        if os.path.exists(self.bg_image):  # Reemplaza con la ruta de tu imagen de fondo
+            bg_image = Image.open(self.bg_image)
             screen_width = self.master.winfo_screenwidth()
             screen_height = self.master.winfo_screenheight()
             bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
@@ -348,7 +355,7 @@ class MovieListView(Frame):
         if self.bg_photo:
             screen_width = self.master.winfo_width()
             screen_height = self.master.winfo_height()
-            bg_image = Image.open("src/assets/Test.jpg")
+            bg_image = Image.open(self.bg_image)
             bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
             self.bg_photo = ImageTk.PhotoImage(bg_image)
             self.bg_label.config(image=self.bg_photo)

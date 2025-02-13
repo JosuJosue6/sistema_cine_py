@@ -20,6 +20,14 @@ class CombosSelectionView(Frame):
         self.selected_combos = []
         self.total_price = subtotal
         self.combo_frames = {}  # Diccionario para almacenar los frames de los combos
+        
+
+        #imagen para el BG
+        #self.bg_image = "src/assets/cine1.jpeg" 
+        #self.bg_image = "src/assets/cine2.jpeg" 
+        #self.bg_image = "src/assets/cine3.jpeg" 
+        #self.bg_image = "src/assets/cine4.jpeg" 
+        self.bg_image = "src/assets/Test.jpg"
 
         self.init_ui()
 
@@ -70,7 +78,7 @@ class CombosSelectionView(Frame):
 
         # Contenedor central con borde negro
         self.container = Frame(self.master, bg="#ffffff", bd=2, relief="solid", highlightbackground="black", highlightthickness=2)
-        self.container.place(relx=0.5, rely=0.5, anchor="center", width=800, height=600)
+        self.container.place(relx=0.5, rely=0.5, anchor="center", width=750, height=600)
 
         self.title_label = Label(self.container, text=f"Selecciona tus combos para: {self.movie.title}", font=("Helvetica", 18, "bold"), bg="#ffffff", fg="black")
         self.title_label.pack(pady=10)
@@ -127,10 +135,10 @@ class CombosSelectionView(Frame):
             self.combo_frames[combo] = combo_frame  # Almacenar el frame del combo
             index = 2
             # Cargar la imagen del combo
-            image_path = f"src/assets/combos/combo{index}.jpg"  # Reemplaza con la ruta de tu imagen
+            #image_path = f"src/assets/combos/combo{index}.jpg"  # Reemplaza con la ruta de tu imagen
             print(index)
-            if os.path.exists(image_path):
-                combo_image = Image.open(image_path)
+            if os.path.exists(combo.image):
+                combo_image = Image.open(combo.image)
                 combo_image = combo_image.resize((100, 100), Image.LANCZOS)
                 combo_photo = ImageTk.PhotoImage(combo_image)
 
@@ -228,8 +236,8 @@ class CombosSelectionView(Frame):
         self.master.mainloop()
 
     def load_background_image(self):
-        if os.path.exists("src/assets/Test.jpg"):  # Reemplaza con la ruta de tu imagen de fondo
-            bg_image = Image.open("src/assets/Test.jpg")
+        if os.path.exists(self.bg_image):  # Reemplaza con la ruta de tu imagen de fondo
+            bg_image = Image.open(self.bg_image)
             screen_width = self.master.winfo_screenwidth()
             screen_height = self.master.winfo_screenheight()
             bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
@@ -241,7 +249,7 @@ class CombosSelectionView(Frame):
         if self.bg_photo:
             screen_width = self.master.winfo_width()
             screen_height = self.master.winfo_height()
-            bg_image = Image.open("src/assets/Test.jpg")
+            bg_image = Image.open(self.bg_image)
             bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
             self.bg_photo = ImageTk.PhotoImage(bg_image)
             self.bg_label.config(image=self.bg_photo)

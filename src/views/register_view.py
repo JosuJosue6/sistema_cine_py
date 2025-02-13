@@ -7,6 +7,8 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from mailjet_rest import Client
 import base64
+import re
+import requests
 
 class RegisterUserView(Frame):
     def __init__(self, master, db_connection):
@@ -16,6 +18,13 @@ class RegisterUserView(Frame):
         self.user_controller = UserController(db_connection)
         self.bg_photo = None
         self.bg_label = None
+
+        #self.bg_image = "src/assets/cine1.jpeg" 
+        #self.bg_image = "src/assets/cine2.jpeg" 
+        #self.bg_image = "src/assets/cine3.jpeg" 
+        #self.bg_image = "src/assets/cine4.jpeg" 
+        self.bg_image = "src/assets/Test.jpg"
+
         self.init_ui()
 
     def init_ui(self):
@@ -101,8 +110,8 @@ class RegisterUserView(Frame):
         self.footer_label.pack(pady=10)
         
     def load_background_image(self):
-        if os.path.exists("src/assets/Test.jpg"):  # Reemplaza con la ruta de tu imagen de fondo
-            bg_image = Image.open("src/assets/Test.jpg")
+        if os.path.exists(self.bg_image):  # Reemplaza con la ruta de tu imagen de fondo
+            bg_image = Image.open(self.bg_image)
             screen_width = self.master.winfo_screenwidth()
             screen_height = self.master.winfo_screenheight()
             bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
@@ -115,7 +124,7 @@ class RegisterUserView(Frame):
         if self.bg_photo:
             screen_width = self.master.winfo_width()
             screen_height = self.master.winfo_height()
-            bg_image = Image.open("src/assets/Test.jpg")
+            bg_image = Image.open(self.bg_image)
             bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
             self.bg_photo = ImageTk.PhotoImage(bg_image)
             self.bg_label.config(image=self.bg_photo)
@@ -135,6 +144,16 @@ class RegisterUserView(Frame):
         if password != confirm_password:
             messagebox.showwarning("Advertencia", "Las contraseñas no coinciden.")
             return
+        
+        # Validar el formato del correo electrónico
+        if not self.is_valid_email(email):
+            messagebox.showwarning("Advertencia", "El correo electrónico no tiene un formato válido.")
+            return
+        
+        # Verificar si el correo electrónico existe
+        if not self.verify_email_exists(email):
+            messagebox.showwarning("Advertencia", "El correo electrónico no existe.")
+            return
 
         user_data = {
             'name': name,
@@ -147,10 +166,27 @@ class RegisterUserView(Frame):
         try:
             if self.send_verification_email(email):
                 self.user_controller.create_user(user_data)
-                messagebox.showinfo("Éxito", "Usuario registrado exitosamente. Se ha enviado un correo de verificación.")
+                messagebox.showinfo("Éxito", "Usuario registrado exitosamente. Se ha enviado un correo de verificación, si no lo recibio, verifique su email.")
                 self.clear_entries()
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo registrar el usuario. Error: {e}")
+
+    def is_valid_email(self, email):
+        # Expresión regular para validar el formato del correo electrónico
+        regex = r'^\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        return re.match(regex, email) is not None
+
+    def verify_email_exists(self, email):
+        api_key = "d76a2c3e8c2e1b2825a200a70bdeb361e7588019"  
+        url = f"https://api.hunter.io/v2/email-verifier?email={email}&api_key={api_key}"
+        response = requests.get(url)
+        data = response.json()
+
+        if response.status_code == 200 and data['data']['status'] == 'valid':
+            print("Correo electrónico válido")
+            return True
+        else:
+            return False
 
     def send_verification_email(self, email):
         api_key = "173d140b1aa3661cc8b4c5128fce73e7"
