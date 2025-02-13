@@ -127,14 +127,3 @@ class LoginView(Frame):
         register_view = RegisterUserView(register_window, self.db_connection)
         register_view.pack(fill="both", expand=True)
         register_window.mainloop()
-
-# Ejemplo de uso
-if __name__ == "__main__":
-    from tkinter import Tk
-    from db_connection import DBConnection  # Asegúrate de tener una clase DBConnection para manejar la conexión a la base de datos
-
-    root = Tk()
-    db_connection = DBConnection()  # Inicializa tu conexión a la base de datos
-    app = LoginView(root, db_connection)
-    app.pack(fill="both", expand=True)
-    root.mainloop()
