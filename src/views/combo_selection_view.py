@@ -1,4 +1,4 @@
-from tkinter import Frame, Label, Button, Listbox, StringVar, Entry, messagebox, Toplevel, Radiobutton, IntVar, Canvas, Scrollbar, Menu,Tk
+from tkinter import Frame, Label, Button, Listbox, StringVar, Entry, messagebox, Toplevel, Radiobutton, IntVar, Canvas, Scrollbar, Menu, Tk
 from views.promotions_view import PromotionsView  # Asegúrate de importar la clase PromotionsView
 from PIL import Image, ImageTk, ImageDraw  # Necesitarás instalar Pillow para manejar imágenes
 import os
@@ -19,11 +19,13 @@ class CombosSelectionView(Frame):
         self.combos = self.load_combos()
         self.selected_combos = []
         self.total_price = subtotal
+        self.combo_frames = {}  # Diccionario para almacenar los frames de los combos
 
         self.init_ui()
 
     # Método para inicializar la interfaz
     def init_ui(self):
+        self.master.title("Selecciona tus combos")
         # Maximizar la ventana
         self.master.state('zoomed')
         self.master.configure(bg="#ffffff")  # Fondo blanco
@@ -122,6 +124,7 @@ class CombosSelectionView(Frame):
         for combo in self.combos:
             combo_frame = Frame(self.scrollable_frame, bg="#ffffff", bd=2, relief="solid", padx=10, pady=10, width=700)
             combo_frame.pack(fill="x", pady=5)
+            self.combo_frames[combo] = combo_frame  # Almacenar el frame del combo
             index = 2
             # Cargar la imagen del combo
             image_path = f"src/assets/combos/combo{index}.jpg"  # Reemplaza con la ruta de tu imagen
@@ -146,8 +149,10 @@ class CombosSelectionView(Frame):
     def toggle_combo_selection(self, combo):
         if combo in self.selected_combos:
             self.selected_combos.remove(combo)
+            self.combo_frames[combo].config(bg="#ffffff")  # Cambiar el fondo a blanco
         else:
             self.selected_combos.append(combo)
+            self.combo_frames[combo].config(bg="#d3d3d3")  # Cambiar el fondo a gris claro
         self.update_total_price()
 
     # Método para actualizar el precio total
@@ -246,7 +251,7 @@ class CombosSelectionView(Frame):
 
     def open_user_detail_view(self):
         user_detail_window = Toplevel(self.master)
-        user_detail_view = UserDetailView(user_detail_window, self.movie_controller.db_connection, self.email)
+        user_detail_view = UserDetailView(user_detail_window, self.db_connection, self.email)
         user_detail_view.pack(fill="both", expand=True)
         user_detail_window.mainloop()
 
@@ -254,6 +259,6 @@ class CombosSelectionView(Frame):
         from views.login_view import LoginView
         self.master.destroy()
         login_window = Tk()
-        login_view = LoginView(login_window, self.movie_controller.db_connection)
+        login_view = LoginView(login_window, self.db_connection)
         login_view.pack(fill="both", expand=True)
-        login_window.mainloop() 
+        login_window.mainloop()

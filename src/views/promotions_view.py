@@ -1,9 +1,10 @@
-from tkinter import Frame, Label, Listbox, Button, messagebox, Toplevel
+from tkinter import Frame, Label, Listbox, Button, messagebox, Toplevel, Menu, Tk
 from controllers.promotion_controller import PromotionController
 from views.summary_view import SummaryView  # Asegúrate de importar la clase SummaryView
 from decimal import Decimal
 from PIL import Image, ImageTk, ImageDraw  # Necesitarás instalar Pillow para manejar imágenes
 import os
+from views.user_detail_view import UserDetailView 
 
 class PromotionsView(Frame):
     def __init__(self, master=None, purchase_summary=None, database=None, user_email=None, ticket_price=None):
@@ -24,6 +25,7 @@ class PromotionsView(Frame):
         self.load_promotions()
 
     def create_widgets(self):
+        self.master.title("Promociones")
         # Maximizar la ventana
         self.master.state('zoomed')
         self.master.configure(bg="white")  # Fondo blanco
@@ -57,10 +59,18 @@ class PromotionsView(Frame):
             self.navbar_image_label = Label(self.navbar, image=navbar_photo, bg="#333333")
             self.navbar_image_label.image = navbar_photo  # Guardar una referencia para evitar que la imagen sea recolectada por el garbage collector
             self.navbar_image_label.pack(side="right", padx=10, pady=10)
+            
+            # Crear el menú desplegable
+            self.navbar_menu = Menu(self.navbar, tearoff=0, bg="#333333", fg="white", font=("Helvetica", 12), activebackground="#1a1a1a", activeforeground="white")
+            self.navbar_menu.add_command(label="Ver perfil", command=self.open_user_detail_view)
+            self.navbar_menu.add_command(label="Cerrar sesión", command=self.logout)
+            
+            # Asociar el menú desplegable a la imagen
+            self.navbar_image_label.bind("<Button-1>", self.show_navbar_menu)
 
         # Contenedor central con borde negro
         self.container = Frame(self.master, bg="#ffffff", bd=2, relief="solid", highlightbackground="black", highlightthickness=2)
-        self.container.place(relx=0.5, rely=0.5, anchor="center", width=600, height=600)
+        self.container.place(relx=0.5, rely=0.5, anchor="center", width=600, height=400)
 
         self.title_label = Label(self.container, text="Promociones Vigentes", font=("Helvetica", 18, "bold"), bg="white", fg="black")
         self.title_label.pack(pady=10)
@@ -137,3 +147,20 @@ class PromotionsView(Frame):
             bg_image = bg_image.resize((screen_width, screen_height), Image.LANCZOS)
             self.bg_photo = ImageTk.PhotoImage(bg_image)
             self.bg_label.config(image=self.bg_photo)
+    
+    def show_navbar_menu(self, event):
+            self.navbar_menu.post(event.x_root, event.y_root)
+
+    def open_user_detail_view(self):
+        user_detail_window = Toplevel(self.master)
+        user_detail_view = UserDetailView(user_detail_window, self.db, self.email)
+        user_detail_view.pack(fill="both", expand=True)
+        user_detail_window.mainloop()
+
+    def logout(self):
+        from views.login_view import LoginView
+        self.master.destroy()
+        login_window = Tk()
+        login_view = LoginView(login_window, self.db)
+        login_view.pack(fill="both", expand=True)
+        login_window.mainloop() 

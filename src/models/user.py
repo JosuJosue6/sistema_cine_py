@@ -7,7 +7,7 @@ class User:
         self.CI = CI
         self.email = email
         self.password = password
-        self.purchase_history = []
+        #self.purchase_history = []
 
     # Agrega una compra a la lista de compras
     def add_purchase(self, purchase):

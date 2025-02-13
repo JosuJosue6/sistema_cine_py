@@ -2,6 +2,11 @@ from tkinter import Frame, Label, Entry, Button, messagebox, Toplevel
 from controllers.user_controller import UserController
 from PIL import Image, ImageTk, ImageDraw
 import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from mailjet_rest import Client
+import base64
 
 class RegisterUserView(Frame):
     def __init__(self, master, db_connection):
@@ -51,37 +56,37 @@ class RegisterUserView(Frame):
         self.container.place(relx=0.5, rely=0.5, anchor="center", width=400, height=600)
 
         self.title_label = Label(self.container, text="Registrar Usuario", font=("Arial", 18, "bold"), bg="#f0f0f0", fg="#333")
-        self.title_label.pack(pady=7)
+        self.title_label.pack(pady=5)
 
         self.name_label = Label(self.container, text="Nombre:", font=("Arial", 12), bg="#f0f0f0", fg="#333")
-        self.name_label.pack(pady=7)
+        self.name_label.pack(pady=5)
         self.name_entry = Entry(self.container, font=("Arial", 12))
-        self.name_entry.pack(pady=7)
+        self.name_entry.pack(pady=5)
 
         self.lastname_label = Label(self.container, text="Apellido:", font=("Arial", 12), bg="#f0f0f0", fg="#333")
-        self.lastname_label.pack(pady=7)
+        self.lastname_label.pack(pady=5)
         self.lastname_entry = Entry(self.container, font=("Arial", 12))
-        self.lastname_entry.pack(pady=7)
+        self.lastname_entry.pack(pady=5)
 
         self.ci_label = Label(self.container, text="CI:", font=("Arial", 12), bg="#f0f0f0", fg="#333")
-        self.ci_label.pack(pady=7)
+        self.ci_label.pack(pady=5)
         self.ci_entry = Entry(self.container, font=("Arial", 12))
-        self.ci_entry.pack(pady=7)
+        self.ci_entry.pack(pady=5)
 
         self.email_label = Label(self.container, text="Correo Electrónico:", font=("Arial", 12), bg="#f0f0f0", fg="#333")
-        self.email_label.pack(pady=7)
+        self.email_label.pack(pady=5)
         self.email_entry = Entry(self.container, font=("Arial", 12))
-        self.email_entry.pack(pady=7)
+        self.email_entry.pack(pady=5)
 
         self.password_label = Label(self.container, text="Contraseña:", font=("Arial", 12), bg="#f0f0f0", fg="#333")
-        self.password_label.pack(pady=7)
+        self.password_label.pack(pady=5)
         self.password_entry = Entry(self.container, font=("Arial", 12), show="*")
-        self.password_entry.pack(pady=7)
+        self.password_entry.pack(pady=5)
 
         self.confirm_password_label = Label(self.container, text="Confirmar Contraseña:", font=("Arial", 12), bg="#f0f0f0", fg="#333")
-        self.confirm_password_label.pack(pady=7)
+        self.confirm_password_label.pack(pady=5)
         self.confirm_password_entry = Entry(self.container, font=("Arial", 12), show="*")
-        self.confirm_password_entry.pack(pady=7)
+        self.confirm_password_entry.pack(pady=5)
 
         button_width = 20  
 
@@ -140,11 +145,48 @@ class RegisterUserView(Frame):
         }
 
         try:
-            self.user_controller.create_user(user_data)
-            messagebox.showinfo("Éxito", "Usuario registrado exitosamente.")
+            if(self.send_verification_email(email)):
+                self.user_controller.create_user(user_data)
+                messagebox.showinfo("Éxito", "Usuario registrado exitosamente. Se ha enviado un correo de verificación.")
+
             self.clear_entries()
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo registrar el usuario. Error: {e}")
+
+    def send_verification_email(self, email):
+        api_key = "173d140b1aa3661cc8b4c5128fce73e7"
+        api_secret = "90ab1e9875b79c52e61e01aaeb403f11"
+        from_email = "testpruebasvsc@gmail.com"
+        subject = "Verificación de correo electrónico"
+        body = "Gracias por registrarte. Por favor, su correo fue registrado con exito, si no identifica este mensaje contactenos."
+
+        mailjet = Client(auth=(api_key, api_secret), version='v3.1')
+        data = {
+            'Messages': [
+                {
+                    "From": {
+                        "Email": from_email,
+                        "Name": "Sistema de Cine"
+                    },
+                    "To": [
+                        {
+                            "Email": email,
+                            "Name": "Nuevo Usuario"
+                        }
+                    ],
+                    "Subject": subject,
+                    "TextPart": body
+                }
+            ]
+        }
+
+        result = mailjet.send.create(data=data)
+        if result.status_code == 200:
+            print("Correo de verificación enviado exitosamente")
+        else:
+            messagebox.showerror("Error de Envío", "No se pudo enviar el correo electrónico. Verifica tu correo.")
+            print(f"Error: {result.status_code}")
+            print(result.json())
 
     def clear_entries(self):
         self.name_entry.delete(0, 'end')

@@ -21,6 +21,8 @@ class SeatSelectionView(Frame):
         self.init_ui()
 
     def init_ui(self):
+
+        self.master.title("Selecciona tus asientos")
         # Maximizar la ventana
         self.master.state('zoomed')
         self.master.configure(bg="#f0f0f0")  # Fondo gris claro
@@ -63,16 +65,16 @@ class SeatSelectionView(Frame):
             # Asociar el menú desplegable a la imagen
             self.navbar_image_label.bind("<Button-1>", self.show_navbar_menu)
 
-        self.title_label = Label(self.master, text=f"Selecciona tus asientos para: {self.movie.title}", font=("Arial", 18, "bold"), bg="#FFD700", fg="#333")
+        self.title_label = Label(self.master, text=f"Selecciona tus asientos para:\n {self.movie.title}", font=("Arial", 18, "bold"), bg="#FFD700", fg="#333",width=40, height=4)
         self.title_label.pack(pady=10)
 
-        self.seat_frame = Frame(self.master, bg="#f0f0f0", bd=2, relief="solid")
-        self.seat_frame.pack(pady=10, padx=10, fill="both", expand=True)
+        self.seat_frame = Frame(self.master, bg="#f0f0f0", bd=2, relief="solid", width=1000, height=800)
+        self.seat_frame.place(relx=0.5, rely=0.5, anchor="center")
 
         self.seat_buttons = self.create_seat_buttons()
 
         self.confirm_button = Button(self.master, text="Confirmar selección", command=self.confirm_selection, bg="#000000", fg="white", font=("Arial", 12, "bold"))
-        self.confirm_button.pack(pady=10)
+        self.confirm_button.place(relx=0.5, rely=0.75, anchor="center")
 
         # Pie de página
         self.footer = Frame(self.master, bg="#333333", height=50)
@@ -153,7 +155,7 @@ class SeatSelectionView(Frame):
 
     def open_user_detail_view(self):
         user_detail_window = Toplevel(self.master)
-        user_detail_view = UserDetailView(user_detail_window, self.movie_controller.db_connection, self.email)
+        user_detail_view = UserDetailView(user_detail_window, self.db_connection, self.email)
         user_detail_view.pack(fill="both", expand=True)
         user_detail_window.mainloop()
 
@@ -161,7 +163,7 @@ class SeatSelectionView(Frame):
         from views.login_view import LoginView
         self.master.destroy()
         login_window = Tk()
-        login_view = LoginView(login_window, self.movie_controller.db_connection)
+        login_view = LoginView(login_window, self.db_connection)
         login_view.pack(fill="both", expand=True)
         login_window.mainloop()   
     def run(self):

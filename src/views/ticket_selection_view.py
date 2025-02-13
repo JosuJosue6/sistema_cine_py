@@ -22,7 +22,7 @@ class TicketSelectionView(Frame):
 
     # Método para inicializar la interfaz
     def init_ui(self):
-
+        self.master.title("Compra de boletos")
         # Maximizar la ventana
         self.master.state('zoomed')
         self.master.configure(bg="#ffffff")  # Fondo blanco
@@ -200,7 +200,7 @@ class TicketSelectionView(Frame):
 
     def open_user_detail_view(self):
         user_detail_window = Toplevel(self.master)
-        user_detail_view = UserDetailView(user_detail_window, self.movie_controller.db_connection, self.email)
+        user_detail_view = UserDetailView(user_detail_window, self.db_connection, self.email)
         user_detail_view.pack(fill="both", expand=True)
         user_detail_window.mainloop()
 
@@ -208,6 +208,6 @@ class TicketSelectionView(Frame):
         from views.login_view import LoginView
         self.master.destroy()
         login_window = Tk()
-        login_view = LoginView(login_window, self.movie_controller.db_connection)
+        login_view = LoginView(login_window, self.db_connection)
         login_view.pack(fill="both", expand=True)
         login_window.mainloop() 

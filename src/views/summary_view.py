@@ -8,6 +8,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from mailjet_rest import Client
 from views.user_detail_view import UserDetailView  
+from datetime import datetime
 
 class SummaryView(Frame):
     def __init__(self, master, purchase_summary, db_connection, user_email):
@@ -66,32 +67,34 @@ class SummaryView(Frame):
         self.container = Frame(self.master, bg="#ffffff", bd=2, relief="solid", highlightbackground="black", highlightthickness=2)
         self.container.place(relx=0.5, rely=0.5, anchor="center", width=600, height=600)
 
-        self.title_label = Label(self.container, text="Resumen de Compra", font=("Arial", 24, "bold"), bg="#ffffff", fg="black")
+        self.container_info = Frame (self.container, bg="#ffffff", bd=2, relief="solid", highlightbackground="black", highlightthickness=2)
+        self.container_info.place(relx=0.5, rely=0.5, anchor="center", width=600, height=600)
+        self.title_label = Label(self.container_info, text="Resumen de Compra", font=("Arial", 24, "bold"), bg="#ffffff", fg="black")
         self.title_label.pack(pady=10)
 
-        self.movie_label = Label(self.container, text=f"Película: {self.purchase_summary['movie']}", font=("Arial", 14), bg="#ffffff", fg="black")
+        self.movie_label = Label(self.container_info, text=f"Película: {self.purchase_summary['movie']}", font=("Arial", 14), bg="#ffffff", fg="black")
         self.movie_label.pack(pady=5)
 
-        self.seats_label = Label(self.container, text=f"Asientos: {', '.join(self.purchase_summary['seats'])}", font=("Arial", 14), bg="#ffffff", fg="black")
+        self.seats_label = Label(self.container_info, text=f"Asientos: {', '.join(self.purchase_summary['seats'])}", font=("Arial", 14), bg="#ffffff", fg="black")
         self.seats_label.pack(pady=5)
 
-        self.combos_label = Label(self.container, text=f"Combos: {', '.join(self.purchase_summary['combos'])}", font=("Arial", 14), bg="#ffffff", fg="black")
+        self.combos_label = Label(self.container_info, text=f"Combos: {', '.join(self.purchase_summary['combos'])}", font=("Arial", 14), bg="#ffffff", fg="black")
         self.combos_label.pack(pady=5)
 
-        self.promotions_label = Label(self.container, text=f"Promociones aplicadas: {', '.join(self.purchase_summary['promotions'])}", font=("Arial", 14), bg="#ffffff", fg="black")
+        self.promotions_label = Label(self.container_info, text=f"Promociones aplicadas: {', '.join(self.purchase_summary['promotions'])}", font=("Arial", 14), bg="#ffffff", fg="black")
         self.promotions_label.pack(pady=5)
 
-        self.total_label = Label(self.container, text=f"Total a pagar: ${self.purchase_summary['total']:.2f}", font=("Arial", 14), bg="#ffffff", fg="black")
-        self.total_label.pack(pady=10)
+        self.total_label = Label(self.container_info, text=f"Total a pagar: ${self.purchase_summary['total']:.2f}", font=("Arial", 14), bg="#ffffff", fg="black")
+        self.total_label.pack(pady=20)
 
-        self.confirm_button = Button(self.container, text="Confirmar Compra", command=self.confirm_purchase, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
+        self.confirm_button = Button(self.container_info, text="Confirmar Compra", command=self.confirm_purchase, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
         self.confirm_button.pack(pady=20)
 
         #self.new_purchase_button = Button(self.container, text="Realizar Nueva Compra", command=self.new_purchase, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
         #self.new_purchase_button.pack(pady=10)
-        self.new_purchase_button.pack_forget()  # Ocultar inicialmente
+#        self.new_purchase_button.pack_forget()  # Ocultar inicialmente
 
-        self.exit_button = Button(self.container, text="Salir", command=self.master.quit, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
+        self.exit_button = Button(self.container_info, text="Salir", command=self.master.quit, font=("Arial", 14, "bold"), bg="#333333", fg="white", activebackground="#555555", activeforeground="#ffffff", relief="raised", bd=2)
         self.exit_button.pack(pady=10)
         self.exit_button.pack_forget()  # Ocultar inicialmente
 
@@ -122,7 +125,7 @@ class SummaryView(Frame):
         self.confirm_button.config(state="disabled")
 
         # Mostrar los botones de nueva compra y salir
-        self.new_purchase_button.pack(pady=10)
+       # self.new_purchase_button.pack(pady=10)
         self.exit_button.pack(pady=10)
 
     def generate_pdf(self, pdf_path):
@@ -143,7 +146,7 @@ class SummaryView(Frame):
 
         # Código QR
         qr_path = "purchase_qr.png"
-        c.drawImage(qr_path, 100, height - 400, width=200, height=200)
+        c.drawImage(qr_path, 200, height - 430, width=150, height=150)
 
         # Información adicional de la factura
         c.setFont("Times-Bold", 16)
@@ -151,7 +154,8 @@ class SummaryView(Frame):
         c.setFont("Times-Roman", 14)
         c.drawString(100, height - 470, f"Nombre del Cliente: {self.user_email.split('@')[0].replace('.', ' ').title()}")
         c.drawString(100, height - 490, f"Correo Electrónico: {self.user_email}")
-        c.drawString(100, height - 510, "Fecha de Compra: 08/02/2025")
+        fecha = datetime.now().strftime("%d/%m/%Y")
+        c.drawString(100, height - 510, f"Fecha de Compra: {fecha}")
 
         c.save()
 
@@ -202,14 +206,6 @@ class SummaryView(Frame):
             print(f"Error: {result.status_code}")
             print(result.json())
 
-    def new_purchase(self):
-        self.master.withdraw()  # Ocultar la ventana de SummaryView
-        from views.movie_list_view import MovieListView  # Importación diferida
-        movie_list_window = Toplevel(self.master)
-        movie_list_view = MovieListView(movie_list_window, self.db_connection, self.user_email)
-        movie_list_view.pack()
-        movie_list_window.protocol("WM_DELETE_WINDOW", lambda: (self.master.deiconify(), movie_list_window.destroy()))  # Mostrar la ventana principal cuando se cierre la nueva ventana
-
     def run(self):
         self.pack()
         self.master.mainloop()
@@ -233,20 +229,11 @@ class SummaryView(Frame):
             self.bg_photo = ImageTk.PhotoImage(bg_image)
             self.bg_label.config(image=self.bg_photo)
 
-        def show_navbar_menu(self, event):
-            self.navbar_menu.post(event.x_root, event.y_root)
-
-    def open_user_detail_view(self):
-        user_detail_window = Toplevel(self.master)
-        user_detail_view = UserDetailView(user_detail_window, self.movie_controller.db_connection, self.email)
-        user_detail_view.pack(fill="both", expand=True)
-        user_detail_window.mainloop()
-
     def logout(self):
         from views.login_view import LoginView
         self.master.destroy()
         login_window = Tk()
-        login_view = LoginView(login_window, self.movie_controller.db_connection)
+        login_view = LoginView(login_window, self.db_connection)
         login_view.pack(fill="both", expand=True)
         login_window.mainloop() 
     
@@ -255,6 +242,6 @@ class SummaryView(Frame):
 
     def open_user_detail_view(self):
         user_detail_window = Toplevel(self.master)
-        user_detail_view = UserDetailView(user_detail_window, self.movie_controller.db_connection, self.email)
+        user_detail_view = UserDetailView(user_detail_window, self.db_connection, self.email)
         user_detail_view.pack(fill="both", expand=True)
         user_detail_window.mainloop()

@@ -1,4 +1,4 @@
-use CINEMA;
+use CINE;
 
 CREATE TABLE Movies (
     ID INT PRIMARY KEY IDENTITY(1,1),
@@ -29,14 +29,17 @@ CREATE TABLE Tickets (
 CREATE TABLE Combos (
     ID INT PRIMARY KEY IDENTITY(1,1),
     Description NVARCHAR(100) NOT NULL,
-    Price DECIMAL(5, 2) NOT NULL
+    Price DECIMAL(5, 2) NOT NULL,
+    Image NVARCHAR(255) NOT NULL,
 );
 
 CREATE TABLE Users (
     ID INT PRIMARY KEY IDENTITY(1,1),
     Name NVARCHAR(100) NOT NULL,
+    Lastname NVARCHAR(100) NOT NULL,
+    CI NVARCHAR(10) NOT NULL,
     Email NVARCHAR(100) NOT NULL,
-    PurchaseHistory NVARCHAR(MAX)
+    Password NVARCHAR(100) NOT NULL,
 );
 
 /******************************************************/
@@ -91,6 +94,7 @@ VALUES
 ('A', 'C', 7, 1),
 ('A', 'C', 8, 1),
 ('A', 'C', 9, 1),
+('A', 'C', 10, 1),
 ('A', 'D', 1, 1),
 ('A', 'D', 2, 1),
 ('A', 'D', 3, 1),
@@ -109,16 +113,16 @@ VALUES
 ('Adulto', 10.00, 'None'),
 ('Adulto Mayor', 7.00, 'None');
 
-INSERT INTO Combos (Description, Price)
+INSERT INTO Combos (Description, Price, Image)
 VALUES 
-('Combo 1: Palomitas y soda', 8.00),
-('Combo 2: palomitas grandes y soda', 10.00),
-('Combo 3: palomitas y soda grande', 10.00),
-('Combo 4: palomitas grandes y soda grande', 12.00);
+('Combo 1: Palomitas y soda', 8.00, 'src/assets/combos/combo1.jpg'),
+('Combo 2: palomitas grandes, hotdog y soda', 10.00, 'src/assets/combos/combo2.jpg'),
+('Combo 3: palomitas, nachos, ice y soda grande', 10.00, 'src/assets/combos/combo3.jpg'),
+('Combo 4: palomitas grandes, 2 hotdogs, 2 sneakers y 2 sodas grandes', 12.00, 'src/assets/combos/combo4.jpg');
 
-INSERT INTO Users (Name, Email, PurchaseHistory, Password)
+INSERT INTO Users (Name,Lastname, CI, Email, Password)
 VALUES 
-('Josu', 'josuensd@gmail.com', 'None', "123456"),
-('Elizeth', 'elizethparra@hotmail.com', 'None', "123456");
+('Josu','Josue', '1720525516','josuensd@gmail.com', '123456'),
+('Elizeth','Parra','1717171717', 'elizethparra@hotmail.com', '123456');
 
 
